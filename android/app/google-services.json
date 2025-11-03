@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "223564088435",
+    "project_id": "khelify-3368e",
+    "storage_bucket": "khelify-3368e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223564088435:android:559efc66f6919b87fc9606",
+        "android_client_info": {
+          "package_name": "com.khelify.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBokCHU4k4MG6BhiW6iE2LAQ-jI7vhXVag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
