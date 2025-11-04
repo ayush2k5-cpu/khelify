@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -31,11 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               SizedBox(height: 40),
               
-              // Custom Golden Logo with Athlete
               Center(
                 child: Column(
                   children: [
-                    // Golden Athletic Circle with Athlete Silhouette
                     Container(
                       width: 120,
                       height: 120,
@@ -99,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
               
               SizedBox(height: 60),
               
-              // Email Field
               Text(
                 'Email',
                 style: TextStyle(
@@ -148,7 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
               
               SizedBox(height: 20),
               
-              // Password Field
               Text(
                 'Password',
                 style: TextStyle(
@@ -205,7 +202,6 @@ class _LoginScreenState extends State<LoginScreen> {
               
               SizedBox(height: 28),
               
-              // Login Button
               SizedBox(
                 height: 54,
                 child: ElevatedButton(
@@ -242,7 +238,6 @@ class _LoginScreenState extends State<LoginScreen> {
               
               SizedBox(height: 20),
               
-              // Signup Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -252,8 +247,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Signup coming soon!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupScreen()),
                       );
                     },
                     child: Text(
