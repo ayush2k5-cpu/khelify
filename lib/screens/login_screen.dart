@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:google_fonts/google_fonts.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,6 +11,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _rememberMe = false;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
   @override
@@ -20,10 +22,17 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String? _validateEmail(String email) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (email.isEmpty) return 'Email is required';
+    if (!emailRegex.hasMatch(email)) return 'Invalid email format';
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF0F1419),
+      backgroundColor: Color(0xFF000000),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -36,59 +45,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 140,
+                      height: 140,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF5B7EFF),
-                            Color(0xFF7B9FFF),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        border: Border.all(color: Color(0xFFD2B68B), width: 3),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFF5B7EFF).withOpacity(0.6),
-                            blurRadius: 25,
-                            spreadRadius: 8,
+                            color: Color(0xFFD2B68B).withOpacity(0.4),
+                            blurRadius: 20,
+                            spreadRadius: 5,
                           ),
                         ],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.directions_run,
-                            size: 80,
-                            color: Colors.white.withOpacity(0.95),
-                          ),
-                          Positioned(
-                            child: CustomPaint(
-                              size: Size(120, 120),
-                              painter: RadiatingLinesPainter(),
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: Icon(Icons.directions_run, size: 80, color: Color(0xFFD2B68B)),
                     ),
                     SizedBox(height: 20),
                     Text(
                       'KHELIFY',
-                      style: TextStyle(
-                        fontSize: 32,
+                      style: GoogleFonts.spaceMono(
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF5B7EFF),
-                        letterSpacing: 2,
+                        color: Color(0xFFD2B68B),
+                        letterSpacing: 3,
                       ),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'AI-Powered Sports Assessment',
-                      style: TextStyle(
+                      'Fuel Your Potential',
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: Colors.grey[600],
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -100,44 +87,30 @@ class _LoginScreenState extends State<LoginScreen> {
               
               Text(
                 'Email',
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[300],
+                  color: Colors.white,
                 ),
               ),
               SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF1A1F2E).withOpacity(0.8),
-                      Color(0xFF242A3A).withOpacity(0.8),
-                    ],
-                  ),
+                  color: Color(0xFF1A1A1A),
+                  border: Border.all(color: Color(0xFFD2B68B).withOpacity(0.3)),
                 ),
                 child: TextField(
                   controller: _emailController,
-                  style: TextStyle(color: Colors.white),
+                  style: GoogleFonts.montserrat(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Enter your email',
-                    hintStyle: TextStyle(color: Colors.grey[600]),
-                    prefixIcon: Icon(Icons.email, color: Color(0xFF5B7EFF)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF5B7EFF).withOpacity(0.3),
-                      ),
+                    hintStyle: GoogleFonts.montserrat(
+                      color: Colors.grey[700],
+                      fontSize: 13,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF5B7EFF),
-                        width: 2,
-                      ),
-                    ),
-                    filled: false,
+                    prefixIcon: Icon(Icons.email, color: Color(0xFFD2B68B)),
+                    border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 16),
                   ),
                   keyboardType: TextInputType.emailAddress,
@@ -148,55 +121,100 @@ class _LoginScreenState extends State<LoginScreen> {
               
               Text(
                 'Password',
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[300],
+                  color: Colors.white,
                 ),
               ),
               SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF1A1F2E).withOpacity(0.8),
-                      Color(0xFF242A3A).withOpacity(0.8),
-                    ],
-                  ),
+                  color: Color(0xFF1A1A1A),
+                  border: Border.all(color: Color(0xFFD2B68B).withOpacity(0.3)),
                 ),
                 child: TextField(
                   controller: _passwordController,
-                  style: TextStyle(color: Colors.white),
-                  obscureText: true,
+                  style: GoogleFonts.montserrat(color: Colors.white),
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     hintText: 'Enter your password',
-                    hintStyle: TextStyle(color: Colors.grey[600]),
-                    prefixIcon: Icon(Icons.lock, color: Color(0xFF5B7EFF)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF5B7EFF).withOpacity(0.3),
+                    hintStyle: GoogleFonts.montserrat(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                    ),
+                    prefixIcon: Icon(Icons.lock, color: Color(0xFFD2B68B)),
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                      child: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Color(0xFFD2B68B),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF5B7EFF),
-                        width: 2,
-                      ),
-                    ),
-                    filled: false,
+                    border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
               
+              SizedBox(height: 16),
+              
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    onChanged: (val) => setState(() => _rememberMe = val ?? false),
+                    activeColor: Color(0xFFD2B68B),
+                  ),
+                  Text(
+                    'Remember me',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                    ),
+                  ),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Forgot password feature coming soon!')),
+                    ),
+                    child: Text(
+                      'Forgot Password?',
+                      style: GoogleFonts.montserrat(
+                        color: Color(0xFFD2B68B),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
               if (_errorMessage != null) ...[
                 SizedBox(height: 12),
-                Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Colors.red, fontSize: 12),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.red.withOpacity(0.1),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: GoogleFonts.montserrat(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
               
@@ -205,14 +223,10 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : () {
-                    _handleLogin();
-                  },
+                  onPressed: _isLoading ? null : () => _handleLogin(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF5B7EFF),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    backgroundColor: Color(0xFFA41D3C),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 8,
                   ),
                   child: _isLoading
@@ -226,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                       : Text(
                           'Login',
-                          style: TextStyle(
+                          style: GoogleFonts.montserrat(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -243,20 +257,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     'Don\'t have an account? ',
-                    style: TextStyle(color: Colors.grey[500]),
+                    style: GoogleFonts.montserrat(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                    ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignupScreen()),
-                      );
-                    },
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen())),
                     child: Text(
                       'Sign up',
-                      style: TextStyle(
-                        color: Color(0xFF5B7EFF),
+                      style: GoogleFonts.montserrat(
+                        color: Color(0xFFD2B68B),
                         fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -270,51 +283,87 @@ class _LoginScreenState extends State<LoginScreen> {
   }
   
   void _handleLogin() {
-    print('Email: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
+    String? emailError = _validateEmail(_emailController.text);
     
     setState(() {
-      _errorMessage = null;
+      if (emailError != null) {
+        _errorMessage = emailError;
+      } else if (_passwordController.text.isEmpty) {
+        _errorMessage = 'Password is required';
+      } else if (_passwordController.text.length < 6) {
+        _errorMessage = 'Password must be at least 6 characters';
+      } else {
+        _errorMessage = null;
+      }
     });
-    
+
+    if (_errorMessage != null) return;
+
     setState(() => _isLoading = true);
     
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Logic will be connected tomorrow')),
-        );
+        _showSuccessDialog();
       }
     });
   }
-}
-
-class RadiatingLinesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.25)
-      ..strokeWidth = 1.5;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = 50.0;
-
-    for (int i = 0; i < 12; i++) {
-      final angle = (i * 360 / 12) * (3.14159 / 180);
-      final startX = center.dx + radius * 0.6 * cos(angle);
-      final startY = center.dy + radius * 0.6 * sin(angle);
-      final endX = center.dx + radius * cos(angle);
-      final endY = center.dy + radius * sin(angle);
-
-      canvas.drawLine(
-        Offset(startX, startY),
-        Offset(endX, endY),
-        paint,
-      );
-    }
+  
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Color(0xFF1A1A1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFA41D3C),
+                ),
+                child: Icon(Icons.check, color: Colors.white, size: 40),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Welcome!',
+                style: GoogleFonts.montserrat(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Login successful',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFA41D3C),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text(
+                  'Continue',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(RadiatingLinesPainter oldDelegate) => false;
 }
