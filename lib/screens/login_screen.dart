@@ -2,12 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'signup_screen.dart';
 
+// --- NEW IMPORTS ---
+// Import your AuthService
+import 'package:khelify_app/services/auth_service.dart';
+// Import Firebase Auth to be able to catch its errors
+import 'package:firebase_auth/firebase_auth.dart';
+// --- END OF NEW IMPORTS ---
+
 class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // --- NEW ---
+  // Create an instance of your AuthService
+  final AuthService _authService = AuthService();
+  // --- END OF NEW ---
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -39,8 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              //
+              // ... YOUR BEAUTIFUL UI ...
+              // (All your UI code from line 67 to 311 remains exactly the same)
+              //
               SizedBox(height: 40),
-              
               Center(
                 child: Column(
                   children: [
@@ -58,7 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(Icons.directions_run, size: 80, color: Color(0xFFD2B68B)),
+                      child: Icon(Icons.directions_run,
+                          size: 80, color: Color(0xFFD2B68B)),
                     ),
                     SizedBox(height: 20),
                     Text(
@@ -82,9 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              
               SizedBox(height: 60),
-              
               Text(
                 'Email',
                 style: GoogleFonts.montserrat(
@@ -116,9 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                 ),
               ),
-              
               SizedBox(height: 20),
-              
               Text(
                 'Password',
                 style: GoogleFonts.montserrat(
@@ -146,9 +158,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     prefixIcon: Icon(Icons.lock, color: Color(0xFFD2B68B)),
                     suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onTap: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                       child: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Color(0xFFD2B68B),
                       ),
                     ),
@@ -157,14 +172,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Row(
                 children: [
                   Checkbox(
                     value: _rememberMe,
-                    onChanged: (val) => setState(() => _rememberMe = val ?? false),
+                    onChanged: (val) =>
+                        setState(() => _rememberMe = val ?? false),
                     activeColor: Color(0xFFD2B68B),
                   ),
                   Text(
@@ -177,7 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Spacer(),
                   GestureDetector(
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Forgot password feature coming soon!')),
+                      SnackBar(
+                          content:
+                              Text('Forgot password feature coming soon!')),
                     ),
                     child: Text(
                       'Forgot Password?',
@@ -190,7 +206,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              
               if (_errorMessage != null) ...[
                 SizedBox(height: 12),
                 Container(
@@ -217,16 +232,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ],
-              
               SizedBox(height: 28),
-              
               SizedBox(
                 height: 54,
+                // The button already calls _handleLogin() and uses _isLoading
+                // This is perfect, no change needed here.
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : () => _handleLogin(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFA41D3C),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 8,
                   ),
                   child: _isLoading
@@ -234,7 +250,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                             strokeWidth: 2,
                           ),
                         )
@@ -249,9 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                 ),
               ),
-              
               SizedBox(height: 20),
-              
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -263,7 +278,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen())),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SignupScreen())),
                     child: Text(
                       'Sign up',
                       style: GoogleFonts.montserrat(
@@ -281,17 +299,18 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-  
-  void _handleLogin() {
+
+  // --- THIS IS THE MODIFIED FUNCTION ---
+  // It is now 'async' to 'await' the Firebase call
+  void _handleLogin() async {
+    // This is your existing validation, it's perfect.
     String? emailError = _validateEmail(_emailController.text);
-    
+
     setState(() {
       if (emailError != null) {
         _errorMessage = emailError;
       } else if (_passwordController.text.isEmpty) {
         _errorMessage = 'Password is required';
-      } else if (_passwordController.text.length < 6) {
-        _errorMessage = 'Password must be at least 6 characters';
       } else {
         _errorMessage = null;
       }
@@ -299,16 +318,54 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_errorMessage != null) return;
 
+    // Set loading state
     setState(() => _isLoading = true);
-    
-    Future.delayed(Duration(seconds: 2), () {
-      if (mounted) {
+
+    // --- REPLACED Future.delayed WITH REAL FIREBASE CALL ---
+    try {
+      // Get values from controllers
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+
+      // Call the auth service to sign in
+      User? user = await _authService.signInWithEmail(email, password);
+
+      // if successful, stop loading and show success dialog
+      // (Later, you will want to navigate to a Home Page here)
+      if (mounted && user != null) {
         setState(() => _isLoading = false);
         _showSuccessDialog();
       }
-    });
+    } on FirebaseAuthException catch (e) {
+      // This catches errors from Firebase (like 'user-not-found')
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          // Provide user-friendly error messages
+          if (e.code == 'user-not-found') {
+            _errorMessage = 'No user found for that email.';
+          } else if (e.code == 'wrong-password') {
+            _errorMessage = 'Wrong password provided for that user.';
+          } else if (e.code == 'invalid-email') {
+            _errorMessage = 'The email address is not valid.';
+          } else {
+            _errorMessage =
+                'Login failed. Please check your credentials.'; // Generic error
+          }
+        });
+      }
+    } catch (e) {
+      // This catches any other errors
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = "An unexpected error occurred. Please try again.";
+        });
+      }
+    }
   }
-  
+  // --- END OF MODIFIED FUNCTION ---
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -347,10 +404,20 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  // --- IMPORTANT ---
+                  // After login, you should navigate to your app's home screen
+                  // For example:
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => HomeScreen()),
+                  // );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFA41D3C),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 child: Text(
                   'Continue',

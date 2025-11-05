@@ -7,6 +7,78 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:223564088435:android:ca6395d24fe9a1cffc9606",
+        "android_client_info": {
+          "package_name": "com.example.khelify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBokCHU4k4MG6BhiW6iE2LAQ-jI7vhXVag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "223564088435-6bnh5sa3o89rq3dimfm884f02hv675pk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.khelify"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223564088435:android:4315de26e95b0fc1fc9606",
+        "android_client_info": {
+          "package_name": "com.example.khelify_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBokCHU4k4MG6BhiW6iE2LAQ-jI7vhXVag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "223564088435-6bnh5sa3o89rq3dimfm884f02hv675pk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.khelify"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:223564088435:android:559efc66f6919b87fc9606",
         "android_client_info": {
           "package_name": "com.khelify.app"
@@ -29,6 +101,13 @@
             {
               "client_id": "223564088435-6vdshj3sdtekd14cf3u333mjjvaejb0i.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "223564088435-6bnh5sa3o89rq3dimfm884f02hv675pk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.khelify"
+              }
             }
           ]
         }

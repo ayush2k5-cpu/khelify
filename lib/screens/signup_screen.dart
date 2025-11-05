@@ -2,12 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login_screen.dart';
 
+// --- NEW IMPORTS ---
+// Import your AuthService
+import 'package:khelify_app/services/auth_service.dart';
+// Import Firebase Auth to be able to catch its errors
+import 'package:firebase_auth/firebase_auth.dart';
+// --- END OF NEW IMPORTS ---
+
 class SignupScreen extends StatefulWidget {
   @override
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  // --- NEW ---
+  // Create an instance of your AuthService
+  final AuthService _authService = AuthService();
+  // --- END OF NEW ---
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -44,8 +56,11 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              //
+              // ... YOUR BEAUTIFUL UI ...
+              // (All your UI code from line 67 to 311 remains exactly the same)
+              //
               SizedBox(height: 30),
-              
               Center(
                 child: Column(
                   children: [
@@ -63,7 +78,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(Icons.directions_run, size: 60, color: Color(0xFFD2B68B)),
+                      child: Icon(Icons.directions_run,
+                          size: 60, color: Color(0xFFD2B68B)),
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -86,9 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
               ),
-              
               SizedBox(height: 40),
-              
               Text(
                 'Full Name',
                 style: GoogleFonts.montserrat(
@@ -119,9 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Text(
                 'Email',
                 style: GoogleFonts.montserrat(
@@ -153,9 +165,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.emailAddress,
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Text(
                 'Password',
                 style: GoogleFonts.montserrat(
@@ -183,9 +193,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     prefixIcon: Icon(Icons.lock, color: Color(0xFFD2B68B)),
                     suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onTap: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                       child: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Color(0xFFD2B68B),
                       ),
                     ),
@@ -194,9 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Text(
                 'Confirm Password',
                 style: GoogleFonts.montserrat(
@@ -224,9 +235,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     prefixIcon: Icon(Icons.lock, color: Color(0xFFD2B68B)),
                     suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onTap: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                       child: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Color(0xFFD2B68B),
                       ),
                     ),
@@ -235,14 +249,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Row(
                 children: [
                   Checkbox(
                     value: _agreeTerms,
-                    onChanged: (val) => setState(() => _agreeTerms = val ?? false),
+                    onChanged: (val) =>
+                        setState(() => _agreeTerms = val ?? false),
                     activeColor: Color(0xFFD2B68B),
                   ),
                   Expanded(
@@ -256,7 +269,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              
               if (_errorMessage != null) ...[
                 SizedBox(height: 12),
                 Container(
@@ -283,16 +295,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ],
-              
               SizedBox(height: 20),
-              
               SizedBox(
                 height: 54,
+                // The button already calls _handleSignup() and uses _isLoading
+                // This is perfect, no change needed here.
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : () => _handleSignup(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFA41D3C),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 8,
                   ),
                   child: _isLoading
@@ -300,7 +313,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                             strokeWidth: 2,
                           ),
                         )
@@ -315,9 +329,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey[800])),
@@ -334,9 +346,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Expanded(child: Divider(color: Colors.grey[800])),
                 ],
               ),
-              
               SizedBox(height: 16),
-              
               SizedBox(
                 height: 54,
                 child: OutlinedButton(
@@ -347,12 +357,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Color(0xFFD2B68B), width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.g_mobiledata, color: Color(0xFFD2B68B), size: 24),
+                      Icon(Icons.g_mobiledata,
+                          color: Color(0xFFD2B68B), size: 24),
                       SizedBox(width: 12),
                       Text(
                         'Continue with Google',
@@ -366,9 +378,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-              
               SizedBox(height: 16),
-              
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -401,10 +411,12 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-  
-  void _handleSignup() {
+
+  // --- THIS IS THE MODIFIED FUNCTION ---
+  // It is now 'async' to 'await' the Firebase call
+  void _handleSignup() async {
+    // This is your existing validation, it's perfect.
     String? emailError = _validateEmail(_emailController.text);
-    
     setState(() {
       if (_nameController.text.isEmpty) {
         _errorMessage = 'Name is required';
@@ -425,16 +437,50 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (_errorMessage != null) return;
 
+    // Set loading state (you already do this)
     setState(() => _isLoading = true);
-    
-    Future.delayed(Duration(seconds: 2), () {
-      if (mounted) {
+
+    // --- REPLACED Future.delayed WITH REAL FIREBASE CALL ---
+    try {
+      // Get values from controllers
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+      String username = _nameController.text.trim();
+
+      // Call the auth service to create a user
+      User? user =
+          await _authService.signUpWithEmail(email, password, username);
+
+      // if successful, stop loading and show success dialog
+      if (mounted && user != null) {
         setState(() => _isLoading = false);
         _showSuccessDialog();
       }
-    });
+    } on FirebaseAuthException catch (e) {
+      // This catches errors from Firebase (like 'email-already-in-use')
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          // Use the actual error message from Firebase!
+          if (e.code == 'email-already-in-use') {
+            _errorMessage = 'This email is already in use.';
+          } else {
+            _errorMessage = e.message;
+          }
+        });
+      }
+    } catch (e) {
+      // This catches any other errors
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = "An unexpected error occurred. Please try again.";
+        });
+      }
+    }
   }
-  
+  // --- END OF MODIFIED FUNCTION ---
+
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -471,31 +517,32 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: Colors.grey[600],
                 ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFA41D3C),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text(
-                  'Go to Login',
-                  style: GoogleFonts.montserrat(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+      SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFA41D3C),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Text(
+          'Go to Login',
+          style: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
-    );
+    ],
+  ),
+  ),
+  ),
+  );
   }
 }
