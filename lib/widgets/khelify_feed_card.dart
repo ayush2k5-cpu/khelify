@@ -47,11 +47,13 @@ class KhelifyFeedCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text("Sarah Johnson",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.5)),
+                          Text(
+                            "Sarah Johnson",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.5),
+                          ),
                           SizedBox(width: 5),
                           Icon(Icons.verified, color: Colors.blue, size: 17),
                         ],
@@ -134,7 +136,11 @@ class KhelifyFeedCard extends StatelessWidget {
                 children: [
                   Icon(Icons.flash_on, color: Color(0xffffd700), size: 17),
                   SizedBox(width: 7),
-                  Text("40m Sprint", style: TextStyle(color: Color(0xffffd700), fontSize: 14.1, fontWeight: FontWeight.bold)),
+                  Text("40m Sprint",
+                      style: TextStyle(
+                          color: Color(0xffffd700),
+                          fontSize: 14.1,
+                          fontWeight: FontWeight.bold)),
                   SizedBox(width: 8),
                   Text("•", style: TextStyle(color: Color(0xffffd700))),
                   SizedBox(width: 8),

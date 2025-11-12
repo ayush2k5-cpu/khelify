@@ -1,6 +1,8 @@
- // ══════════════════════════════════════════════════════════
-// POST MODEL
-// Represents a social media post in the feed
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// ══════════════════════════════════════════════════════════
+// POST MODEL - Feed Activity Posts
+// Strava + Instagram Hybrid Structure
 // ══════════════════════════════════════════════════════════
 
 class Post {
@@ -8,24 +10,30 @@ class Post {
   final String userId;
   final String userName;
   final String userAvatar;
-  final String userTier;
+  final String userTier; // Elite, Pro, Advanced, Beginner
   final String content;
   final String? mediaUrl;
   final String? mediaThumbnail;
-  final String mediaType;
-  final int mediaDuration;
+  final String mediaType; // video, image, none
+  final int mediaDuration; // seconds (for videos)
+  
+  // Drill Info
   final String drillName;
   final String drillIcon;
   final int score;
-  final String tier;
+  final String tier; // ELITE, PRO, ADVANCED, BEGINNER
+  
+  // Engagement
   final int likes;
   final int comments;
   final int reposts;
   final int shares;
   final List<String> likedBy;
+  
+  // Metadata
   final DateTime timestamp;
   final bool isVerified;
-
+  
   Post({
     required this.id,
     required this.userId,
@@ -35,42 +43,87 @@ class Post {
     required this.content,
     this.mediaUrl,
     this.mediaThumbnail,
-    required this.mediaType,
-    required this.mediaDuration,
+    this.mediaType = 'none',
+    this.mediaDuration = 0,
     required this.drillName,
     required this.drillIcon,
     required this.score,
     required this.tier,
-    required this.likes,
-    required this.comments,
-    required this.reposts,
-    required this.shares,
-    required this.likedBy,
+    this.likes = 0,
+    this.comments = 0,
+    this.reposts = 0,
+    this.shares = 0,
+    this.likedBy = const [],
     required this.timestamp,
-    required this.isVerified,
+    this.isVerified = false,
   });
-
-  // Helper method to format duration (e.g., "0:15")
-  String formatDuration() {
-    int minutes = mediaDuration ~/ 60;
-    int seconds = mediaDuration % 60;
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  
+  // ========== FIRESTORE CONVERSION ==========
+  
+  factory Post.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    
+    return Post(
+      id: doc.id,
+      userId: data['userId'] ?? '',
+      userName: data['userName'] ?? '',
+      userAvatar: data['userAvatar'] ?? '',
+      userTier: data['userTier'] ?? 'Beginner',
+      content: data['content'] ?? '',
+      mediaUrl: data['mediaUrl'],
+      mediaThumbnail: data['mediaThumbnail'],
+      mediaType: data['mediaType'] ?? 'none',
+      mediaDuration: data['mediaDuration'] ?? 0,
+      drillName: data['drillName'] ?? '',
+      drillIcon: data['drillIcon'] ?? '⚡',
+      score: data['score'] ?? 0,
+      tier: data['tier'] ?? 'BEGINNER',
+      likes: data['likes'] ?? 0,
+      comments: data['comments'] ?? 0,
+      reposts: data['reposts'] ?? 0,
+      shares: data['shares'] ?? 0,
+      likedBy: List<String>.from(data['likedBy'] ?? []),
+      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      isVerified: data['isVerified'] ?? false,
+    );
   }
-
-  // Helper method to format engagement numbers (e.g., "1.2K", "89")
-  String formatEngagement(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}K';
-    }
-    return count.toString();
+  
+  Map<String, dynamic> toFirestore() {
+    return {
+      'userId': userId,
+      'userName': userName,
+      'userAvatar': userAvatar,
+      'userTier': userTier,
+      'content': content,
+      'mediaUrl': mediaUrl,
+      'mediaThumbnail': mediaThumbnail,
+      'mediaType': mediaType,
+      'mediaDuration': mediaDuration,
+      'drillName': drillName,
+      'drillIcon': drillIcon,
+      'score': score,
+      'tier': tier,
+      'likes': likes,
+      'comments': comments,
+      'reposts': reposts,
+      'shares': shares,
+      'likedBy': likedBy,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'isVerified': isVerified,
+    };
   }
-
-  // Helper method to get time ago string
+  
+  // ========== HELPERS ==========
+  
   String getTimeAgo() {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-
-    if (difference.inDays > 0) {
+    
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()}y';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()}mo';
+    } else if (difference.inDays > 0) {
       return '${difference.inDays}d';
     } else if (difference.inHours > 0) {
       return '${difference.inHours}h';
@@ -80,11 +133,34 @@ class Post {
       return 'now';
     }
   }
+  
+  String formatDuration() {
+    final minutes = mediaDuration ~/ 60;
+    final seconds = mediaDuration % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+  
+  String formatEngagement(int count) {
+    if (count >= 1000000) {
+      return '${(count / 1000000).toStringAsFixed(1)}M';
+    } else if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}K';
+    }
+    return count.toString();
+  }
+  
+  // ========== COMPATIBILITY GETTERS FOR FEED CARD ==========
+  
+  String get userRole => userTier;
+  String? get videoUrl => mediaType == 'video' ? mediaUrl : null;
+  
+  String getTimeAgoSimple() {
+    return getTimeAgo();
+  }
 }
 
 // ══════════════════════════════════════════════════════════
 // DRILL MODEL
-// Represents a training drill
 // ══════════════════════════════════════════════════════════
 
 class Drill {
@@ -92,12 +168,12 @@ class Drill {
   final String name;
   final String icon;
   final String sport;
-  final String category;
+  final String category; // Sports, Esports
   final String description;
   final List<String> instructions;
-  final int estimatedDuration;
-  final String difficulty;
-
+  final int estimatedDuration; // seconds
+  final String difficulty; // Easy, Medium, Hard
+  
   Drill({
     required this.id,
     required this.name,
@@ -112,8 +188,7 @@ class Drill {
 }
 
 // ══════════════════════════════════════════════════════════
-// APP USER MODEL
-// Represents a user of the app
+// USER MODEL (Simple)
 // ══════════════════════════════════════════════════════════
 
 class AppUser {
@@ -121,25 +196,58 @@ class AppUser {
   final String name;
   final String email;
   final String avatar;
-  final String role;
-  final String tier;
+  final String role; // Athlete, Recruiter
+  final String tier; // Elite, Pro, Advanced, Beginner
   final int totalScore;
   final int totalPosts;
   final int followers;
   final int following;
   final DateTime joinedAt;
-
+  
   AppUser({
     required this.id,
     required this.name,
     required this.email,
     required this.avatar,
     required this.role,
-    required this.tier,
-    required this.totalScore,
-    required this.totalPosts,
-    required this.followers,
-    required this.following,
+    this.tier = 'Beginner',
+    this.totalScore = 0,
+    this.totalPosts = 0,
+    this.followers = 0,
+    this.following = 0,
     required this.joinedAt,
   });
+  
+  factory AppUser.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    
+    return AppUser(
+      id: doc.id,
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      avatar: data['avatar'] ?? '',
+      role: data['role'] ?? 'Athlete',
+      tier: data['tier'] ?? 'Beginner',
+      totalScore: data['totalScore'] ?? 0,
+      totalPosts: data['totalPosts'] ?? 0,
+      followers: data['followers'] ?? 0,
+      following: data['following'] ?? 0,
+      joinedAt: (data['joinedAt'] as Timestamp).toDate(),
+    );
+  }
+  
+  Map<String, dynamic> toFirestore() {
+    return {
+      'name': name,
+      'email': email,
+      'avatar': avatar,
+      'role': role,
+      'tier': tier,
+      'totalScore': totalScore,
+      'totalPosts': totalPosts,
+      'followers': followers,
+      'following': following,
+      'joinedAt': Timestamp.fromDate(joinedAt),
+    };
+  }
 }

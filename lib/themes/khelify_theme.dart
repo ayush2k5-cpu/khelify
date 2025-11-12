@@ -207,7 +207,7 @@ class KhelifyTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: KhelifyColors.scaffoldBackground,
-    
+
     colorScheme: ColorScheme.dark(
       primary: KhelifyColors.sapphireBlue,
       secondary: KhelifyColors.championGold,
@@ -217,7 +217,7 @@ class KhelifyTheme {
       onSecondary: Colors.black,
       onSurface: Colors.white,
     ),
-    
+
     textTheme: TextTheme(
       displayLarge: KhelifyTypography.displayLarge,
       headlineLarge: KhelifyTypography.heading1,
@@ -229,4 +229,23 @@ class KhelifyTheme {
       labelLarge: KhelifyTypography.button,
     ),
   );
+}
+
+// Legacy AppTheme class for backward compatibility
+class AppTheme {
+  static const Color black = KhelifyColors.scaffoldBackground;
+  static const Color creamLight = KhelifyColors.white;
+  static const Color red = KhelifyColors.persianRed;
+  static const Color teal = KhelifyColors.electricBlue;
+  static const Color textMuted = KhelifyColors.textSecondary;
+
+  static ThemeData get premiumDarkTheme => KhelifyTheme.darkTheme;
+
+  static Widget buildPatternOverlay({required double opacity}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(opacity),
+      ),
+    );
+  }
 }
