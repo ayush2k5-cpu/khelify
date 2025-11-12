@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import '../themes/khelify_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override

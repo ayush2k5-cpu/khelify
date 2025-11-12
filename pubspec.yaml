@@ -10,13 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    
+
   cupertino_icons: ^1.0.8
   google_fonts: ^6.1.0
-  
- 
+  lucide_icons: ^0.257.0
+  phosphor_flutter: ^2.0.1
+
+
   firebase_auth: ^4.17.6
   cloud_firestore: ^4.15.6
+
+  cached_network_image: ^3.3.1
 
 dev_dependencies:
   flutter_test:
