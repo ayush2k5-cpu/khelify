@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'themes/app_theme.dart';
-import 'screens/role_selection_screen.dart';
+import 'screens/auth_gate.dart';  // ADD THIS IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +18,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Khelify',
+      title: 'KHELIFY',
       theme: AppTheme.premiumDarkTheme,
-      home: RoleSelectionScreen(), // TODO: Will be replaced by LoginScreen after Ayush finishes
+      home: AuthGate(),  // CHANGE THIS LINE (was RoleSelectionScreen)
+      debugShowCheckedModeBanner: false,
     );
   }
 }
