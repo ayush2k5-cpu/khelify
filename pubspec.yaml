@@ -20,13 +20,13 @@ dependencies:
   # Firebase
   firebase_auth: ^4.17.6
   cloud_firestore: ^4.15.6
-  firebase_storage: ^11.2.0  # ADDED - for video uploads
+  firebase_storage: ^11.2.0  # for video uploads
 
   # HTTP & Networking
-  http: ^1.1.0  # ADDED - for AI API calls
+  http: ^1.1.0  # for AI API calls
 
   # Camera & Media
-  image_picker: ^1.0.4  # ADDED - for video recording
+  image_picker: ^1.0.4  # for video recording
 
   # Caching
   cached_network_image: ^3.3.1
@@ -36,7 +36,6 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^4.0.0
-  # I have REMOVED flutterfire_cli
 
 flutter:
   uses-material-design: true
