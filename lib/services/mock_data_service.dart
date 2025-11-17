@@ -1,7 +1,20 @@
 import '../models/post.dart';
 
 class MockDataService {
-  static List<Drill> _drills = [
+  static List<Map<String, String>> getFollowSuggestions() {
+  return [
+    {'name': 'Mike Ross', 'emoji': '⚡'},
+    {'name': 'Alan Walker', 'emoji': '⚽'},
+    {'name': 'Lisa Wong', 'emoji': '🏃'},
+    {'name': 'Jesse Pink', 'emoji': '🏆'},
+    {'name': 'Olivia Clark', 'emoji': '🥅'},
+    {'name': 'Nathan Reed', 'emoji': '🏀'},
+    {'name': 'Sophia Kim', 'emoji': '🎾'},
+    {'name': 'Ethan Hunt', 'emoji': '🚴‍♂️'},
+  ];
+}
+
+  static final List<Drill> _drills = [
     // Football Drills
     Drill(
       id: 'football_1',
@@ -153,7 +166,7 @@ class MockDataService {
         reposts: 0,
         shares: 3,
         likedBy: [],
-        timestamp: DateTime.now().subtract(Duration(hours: 2)),
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
         isVerified: true,
       ),
       Post(
@@ -176,7 +189,7 @@ class MockDataService {
         reposts: 0,
         shares: 2,
         likedBy: [],
-        timestamp: DateTime.now().subtract(Duration(hours: 5)),
+        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
         isVerified: false,
       ),
       Post(
@@ -199,7 +212,7 @@ class MockDataService {
         reposts: 0,
         shares: 5,
         likedBy: [],
-        timestamp: DateTime.now().subtract(Duration(hours: 8)),
+        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
         isVerified: false,
       ),
       Post(
@@ -222,7 +235,7 @@ class MockDataService {
         reposts: 0,
         shares: 12,
         likedBy: [],
-        timestamp: DateTime.now().subtract(Duration(hours: 12)),
+        timestamp: DateTime.now().subtract(const Duration(hours: 12)),
         isVerified: true,
       ),
       Post(
@@ -245,7 +258,7 @@ class MockDataService {
         reposts: 0,
         shares: 8,
         likedBy: [],
-        timestamp: DateTime.now().subtract(Duration(days: 1)),
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
         isVerified: false,
       ),
     ];

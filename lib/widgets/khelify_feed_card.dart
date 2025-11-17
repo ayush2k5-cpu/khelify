@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
 
 class KhelifyFeedCard extends StatelessWidget {
-  const KhelifyFeedCard({super.key});
+  final String userName;
+  final String userAvatar;
+  final String drillName;
+  final String content;
+  final String? mediaUrl;
+  final int tier;
+  final int score;
+  final String userTier;
+
+  const KhelifyFeedCard({
+    super.key,
+    this.userName = 'Sarah Johnson',
+    this.userAvatar = '',
+    this.drillName = '40m Sprint',
+    this.content = 'Crushed my 40m sprint today! 🔥\nNew PR: 5.9s (-0.4s improvement)\nFeeling unstoppable! 💪',
+    this.mediaUrl,
+    this.tier = 1,
+    this.score = 87,
+    this.userTier = 'ELITE',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +56,9 @@ class KhelifyFeedCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22,
+                  backgroundImage: userAvatar.isNotEmpty ? NetworkImage(userAvatar) : null,
                   backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, color: Colors.white, size: 28),
+                  child: userAvatar.isEmpty ? Icon(Icons.person, color: Colors.white, size: 28) : null,
                 ),
                 SizedBox(width: 13),
                 Expanded(
@@ -48,7 +68,7 @@ class KhelifyFeedCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            "Sarah Johnson",
+                            userName,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -75,7 +95,7 @@ class KhelifyFeedCard extends StatelessWidget {
             SizedBox(height: 17),
             // Main content
             Text(
-              "Crushed my 40m sprint today! 🔥\nNew PR: 5.9s (-0.4s improvement)\nFeeling unstoppable! 💪",
+              content,
               style: TextStyle(
                 fontSize: 15.5,
                 color: Colors.white,
@@ -83,46 +103,48 @@ class KhelifyFeedCard extends StatelessWidget {
                 height: 1.34,
               ),
             ),
-            SizedBox(height: 15),
-            // Media
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?fit=crop&w=600&q=80",
-                    height: 185,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 26,
-                  child: Icon(Icons.play_arrow, color: Colors.blue, size: 34),
-                ),
-                Positioned(
-                  bottom: 10,
-                  right: 15,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.54),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "0:15",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12),
+            if (mediaUrl != null && mediaUrl!.isNotEmpty) ...[
+              SizedBox(height: 15),
+              // Media
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.network(
+                      mediaUrl!,
+                      height: 185,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 13),
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 26,
+                    child: Icon(Icons.play_arrow, color: Colors.blue, size: 34),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 15,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.54),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "0:15",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 13),
+            ],
             // Badge
             Container(
               padding: EdgeInsets.symmetric(horizontal: 13, vertical: 6),
@@ -136,7 +158,7 @@ class KhelifyFeedCard extends StatelessWidget {
                 children: [
                   Icon(Icons.flash_on, color: Color(0xffffd700), size: 17),
                   SizedBox(width: 7),
-                  Text("40m Sprint",
+                  Text(drillName,
                       style: TextStyle(
                           color: Color(0xffffd700),
                           fontSize: 14.1,
@@ -144,11 +166,11 @@ class KhelifyFeedCard extends StatelessWidget {
                   SizedBox(width: 8),
                   Text("•", style: TextStyle(color: Color(0xffffd700))),
                   SizedBox(width: 8),
-                  Text("87", style: TextStyle(color: Color(0xffffd700))),
+                  Text(score.toString(), style: TextStyle(color: Color(0xffffd700))),
                   SizedBox(width: 8),
                   Text("•", style: TextStyle(color: Color(0xffffd700))),
                   SizedBox(width: 8),
-                  Text("ELITE", style: TextStyle(color: Color(0xffffd700))),
+                  Text(userTier, style: TextStyle(color: Color(0xffffd700))),
                 ],
               ),
             ),

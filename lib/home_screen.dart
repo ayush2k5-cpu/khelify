@@ -6,29 +6,31 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the instance of your auth service
-    final AuthService _authService = AuthService();
+    final AuthService authService = AuthService();
 
     return Scaffold(
+      backgroundColor: Colors.white, // <<< This forces pure white background!
       appBar: AppBar(
-        title: Text('Khelify Home'),
+        backgroundColor: Colors.white, // <<< AppBar also white
+        foregroundColor: Colors.black,
+        title: const Text(
+          'Khelify Home',
+          style: TextStyle(color: Colors.black),
+        ),
         actions: [
-          // Add a Logout Button
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.black),
             onPressed: () {
-              // Call your sign out method
-              // The AuthGate will automatically detect the logout
-              // and send the user back to the login screen.
-              _authService.signOut();
+              authService.signOut();
             },
           )
         ],
+        elevation: 0.5,
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome! You are logged in.',
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(fontSize: 20, color: Colors.black), // <<< Dark text for light bg
         ),
       ),
     );

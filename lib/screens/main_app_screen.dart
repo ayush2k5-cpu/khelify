@@ -1,17 +1,13 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
 import '../screens/record_modal_sheet.dart';
-
-// ══════════════════════════════════════════════════════════
-// MAIN APP SCREEN
-// Tab navigation + Floating Record Button
-// Home | Khojjoo | Record | Reel | Stats
-// ══════════════════════════════════════════════════════════
+import '../screens/connect_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
-  const MainAppScreen({Key? key}) : super(key: key);
+  const MainAppScreen({super.key});
 
   @override
   State<MainAppScreen> createState() => _MainAppScreenState();
@@ -26,26 +22,29 @@ class _MainAppScreenState extends State<MainAppScreen> {
       backgroundColor: KhelifyColors.scaffoldBackground,
       body: Stack(
         children: [
-          // Main Content (Tab Views)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
+              child: Container(
+                color: Colors.white.withOpacity(0.53),
+              ),
+            ),
+          ),
           IndexedStack(
             index: _currentIndex,
             children: [
-              HomeScreen(), // Tab 0 - FIXED: no userRole here!
-              _buildKhojjooScreen(), // Tab 1
-              _buildRecordScreen(), // Tab 2 (handled by floating button)
-              _buildReelScreen(), // Tab 3
-              _buildStatsScreen(), // Tab 4
+              const HomeScreen(),
+              _buildKhojjooScreen(),
+              _buildRecordScreen(),
+              _buildConnectScreen(),
+              _buildStatsScreen(),
             ],
           ),
-
-          // Floating Record Button
           Positioned(
-            bottom: 55,
-            left: MediaQuery.of(context).size.width / 2 - 28,
+            bottom: 50,
+            left: MediaQuery.of(context).size.width / 2 - 30,
             child: _buildFloatingRecordButton(),
           ),
-
-          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -60,25 +59,18 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  // ========== FLOATING RECORD BUTTON ==========
-
   Widget _buildFloatingRecordButton() {
     return GestureDetector(
       onTap: _onRecordTap,
       onVerticalDragUpdate: (details) {
-        if (details.delta.dy < -5) {
-          _onRecordSwipeUp();
-        }
+        if (details.delta.dy < -5) _onRecordSwipeUp();
       },
       child: _PulsingButton(),
     );
   }
 
-  // ========== NAV HANDLING ==========
-
   void _onNavTap(int index) {
     if (index == 2) {
-      // Record tab - show modal instead
       _onRecordSwipeUp();
     } else {
       setState(() {
@@ -95,8 +87,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
     showRecordModal(
       context,
       onDrillSelected: (drill) {
-        print('Selected drill: ${drill.name}');
-        // TODO: Navigate to camera screen
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Starting ${drill.name}... 🔥'),
@@ -108,14 +98,13 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  // ========== PLACEHOLDER SCREENS ==========
-
   Widget _buildKhojjooScreen() {
     return _buildPlaceholder(
       icon: '📍',
       title: 'KHOJJOO',
       subtitle: 'Discover sports academies near you',
-      description: 'Find Khelo India centers, private academies, and training facilities in your area.',
+      description:
+          'Find Khelo India centers, private academies, and training facilities in your area.',
     );
   }
 
@@ -128,13 +117,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  Widget _buildReelScreen() {
-    return _buildPlaceholder(
-      icon: '📱',
-      title: 'REELS',
-      subtitle: 'Vertical video feed',
-      description: 'Swipe through athlete performances in TikTok-style format.',
-    );
+  Widget _buildConnectScreen() {
+    return const ConnectScreen();
   }
 
   Widget _buildStatsScreen() {
@@ -142,7 +126,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
       icon: '📊',
       title: 'STATS',
       subtitle: 'Your performance dashboard',
-      description: 'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
+      description:
+          'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
     );
   }
 
@@ -154,15 +139,15 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               icon,
-              style: TextStyle(fontSize: 80),
+              style: const TextStyle(fontSize: 80),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ShaderMask(
               shaderCallback: (bounds) {
                 return KhelifyColors.goldGradient.createShader(bounds);
@@ -170,18 +155,18 @@ class _MainAppScreenState extends State<MainAppScreen> {
               child: Text(
                 title,
                 style: KhelifyTypography.displayLarge.copyWith(
-                  color: Colors.white,
+                  color: KhelifyColors.textPrimary,
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               subtitle,
               style: KhelifyTypography.bodyLarge.copyWith(
                 color: KhelifyColors.textSecondary,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               description,
               style: KhelifyTypography.bodyMedium.copyWith(
@@ -189,11 +174,11 @@ class _MainAppScreenState extends State<MainAppScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: KhelifyColors.cardDark,
+                color: KhelifyColors.cardLight,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: KhelifyColors.championGold,
@@ -214,10 +199,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// PULSING BUTTON ANIMATION
-// ══════════════════════════════════════════════════════════
-
 class _PulsingButton extends StatefulWidget {
   @override
   State<_PulsingButton> createState() => _PulsingButtonState();
@@ -227,17 +208,28 @@ class _PulsingButtonState extends State<_PulsingButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _glowAnimation = Tween<double>(begin: 18, end: 40).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
     );
   }
 
@@ -250,33 +242,45 @@ class _PulsingButtonState extends State<_PulsingButton>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _scaleAnimation,
+      animation: _controller,
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Container(
-            width: 56,
-            height: 56,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: KhelifyColors.blueGradient,
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFF6B35),
+                  Color(0xFFFF4500),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: KhelifyColors.championGold.withOpacity(0.4),
-                  blurRadius: 30,
-                  spreadRadius: 5,
+                  color: const Color(0xFFFF6B35).withOpacity(0.7),
+                  blurRadius: _glowAnimation.value,
+                  spreadRadius: _glowAnimation.value / 3,
                 ),
                 BoxShadow(
-                  color: KhelifyColors.sapphireBlue.withOpacity(0.6),
-                  blurRadius: 20,
-                  spreadRadius: 3,
+                  color: const Color(0xFFFF4500).withOpacity(0.4),
+                  blurRadius: _glowAnimation.value * 0.8,
+                  spreadRadius: _glowAnimation.value / 4,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 25,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.videocam_rounded,
               color: Colors.white,
-              size: 28,
+              size: 30,
             ),
           ),
         );
