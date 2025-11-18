@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -15,46 +14,83 @@ class MainAppScreen extends StatefulWidget {
 
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
+  bool _isNavBarVisible = true;
+  final ScrollController _scrollController = ScrollController();
+  double _lastScrollPosition = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentScroll = _scrollController.position.pixels;
+    final scrollDelta = currentScroll - _lastScrollPosition;
+
+    // Hide nav when scrolling down, show when scrolling up
+    if (scrollDelta > 5 && _isNavBarVisible) {
+      setState(() => _isNavBarVisible = false);
+    } else if (scrollDelta < -5 && !_isNavBarVisible) {
+      setState(() => _isNavBarVisible = true);
+    }
+
+    // Always show at top
+    if (currentScroll <= 0 && !_isNavBarVisible) {
+      setState(() => _isNavBarVisible = true);
+    }
+
+    _lastScrollPosition = currentScroll;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KhelifyColors.scaffoldBackground,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 38, sigmaY: 38),
-              child: Container(
-                color: Colors.white.withOpacity(0.53),
+      backgroundColor: const Color.fromARGB(255, 135, 98, 98),   // <- ONLY THIS LINE CHANGED  
+      body: Container(
+        color: Colors.white,            // <- THIS LINE CHANGES THE BACKGROUND COLOR  
+        child: Stack(
+          children: [
+            // Main content with scroll controller
+            Positioned.fill(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  HomeScreen(scrollController: _scrollController),
+                  _buildKhojjooScreen(),
+                  _buildRecordScreen(),
+                  _buildConnectScreen(),
+                  _buildStatsScreen(),
+                ],
               ),
             ),
-          ),
-          IndexedStack(
-            index: _currentIndex,
-            children: [
-              const HomeScreen(),
-              _buildKhojjooScreen(),
-              _buildRecordScreen(),
-              _buildConnectScreen(),
-              _buildStatsScreen(),
-            ],
-          ),
-          Positioned(
-            bottom: 50,
-            left: MediaQuery.of(context).size.width / 2 - 30,
-            child: _buildFloatingRecordButton(),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: BottomNavBar(
-              currentIndex: _currentIndex,
-              onTap: _onNavTap,
+            // Floating record button - adjusts position based on nav visibility
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 200),
+              bottom: _isNavBarVisible ? 30 : 15,
+              left: MediaQuery.of(context).size.width / 2 - 30,
+              child: _buildFloatingRecordButton(),
             ),
-          ),
-        ],
+            // Bottom nav bar with auto-hide
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: BottomNavBar(
+                currentIndex: _currentIndex,
+                onTap: _onNavTap,
+                isVisible: _isNavBarVisible,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -75,6 +111,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
     } else {
       setState(() {
         _currentIndex = index;
+        _isNavBarVisible = true; // Always show nav when switching tabs
       });
     }
   }
@@ -103,8 +140,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
       icon: '📍',
       title: 'KHOJJOO',
       subtitle: 'Discover sports academies near you',
-      description:
-          'Find Khelo India centers, private academies, and training facilities in your area.',
+      description: 'Find Khelo India centers, private academies, and training facilities in your area.',
     );
   }
 
@@ -126,8 +162,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
       icon: '📊',
       title: 'STATS',
       subtitle: 'Your performance dashboard',
-      description:
-          'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
+      description: 'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
     );
   }
 
@@ -143,10 +178,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              icon,
-              style: const TextStyle(fontSize: 80),
-            ),
+            Text(icon, style: const TextStyle(fontSize: 80)),
             const SizedBox(height: 24),
             ShaderMask(
               shaderCallback: (bounds) {
@@ -219,17 +251,11 @@ class _PulsingButtonState extends State<_PulsingButton>
     )..repeat(reverse: true);
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
     _glowAnimation = Tween<double>(begin: 18, end: 40).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
@@ -252,10 +278,7 @@ class _PulsingButtonState extends State<_PulsingButton>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFF6B35),
-                  Color(0xFFFF4500),
-                ],
+                colors: [Color(0xFFFF6B35), Color(0xFFFF4500)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

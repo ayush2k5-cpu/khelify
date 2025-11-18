@@ -7,56 +7,41 @@ import '../services/mock_data_service.dart';
 import '../models/post.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final ScrollController? scrollController;
+  
+  const HomeScreen({super.key, this.scrollController});
 
   @override
   Widget build(BuildContext context) {
-    final posts = MockDataService.getPosts(); // Returns List<Post>
-    final suggestions = [
-      // Hardcode here or (recommended) implement getFollowSuggestions() in MockDataService:
-      {'name': 'Mike Ross', 'emoji': '⚡'},
-      {'name': 'Alan Walker', 'emoji': '⚽'},
-      {'name': 'Lisa Wong', 'emoji': '🏃'},
-      {'name': 'Jesse Pink', 'emoji': '🏆'},
-      {'name': 'Olivia Clark', 'emoji': '🥅'},
-      {'name': 'Nathan Reed', 'emoji': '🏀'},
-    ];
+    final posts = MockDataService.getPosts();
+    final suggestions = MockDataService.getFollowSuggestions();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: null,
-        child: Column(
-          children: [
-            const GlassHeader(),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                itemCount: posts.length + 2, // +2 for Trending and Suggestions
-                itemBuilder: (context, index) {
-                  if (index == 2) return const TrendingCard();
-                  if (index == 4) {
-                    return FollowSuggestionCard(
-                      suggestions: suggestions,
-                    );
-                  }
-                  // Adjust post index so inserted cards don't break the list
-                  int postIndex = index;
-                  if (index > 4) postIndex -= 2;
-                  else if (index > 2) postIndex -= 1;
-
-                  // Prevent out-of-range errors:
-                  if (postIndex < 0 || postIndex >= posts.length) return const SizedBox.shrink();
-
-                  return FeedPostCard(
-                    post: posts[postIndex],
-                    index: postIndex,
-                  );
-                },
-              ),
+      body: Column(
+        children: [
+          const GlassHeader(),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController, // Add this line
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              itemCount: posts.length + 2,
+              itemBuilder: (context, index) {
+                if (index == 2) return const TrendingCard();
+                if (index == 4) {
+                  return FollowSuggestionCard(suggestions: suggestions);
+                }
+                int postIndex = index;
+                if (index > 4) postIndex -= 2;
+                else if (index > 2) postIndex -= 1;
+                if (postIndex < 0 || postIndex >= posts.length) {
+                  return const SizedBox.shrink();
+                }
+                return FeedPostCard(post: posts[postIndex], index: postIndex);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
