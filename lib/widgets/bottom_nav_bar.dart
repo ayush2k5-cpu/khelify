@@ -1,10 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final bool isVisible;
+
 
   const BottomNavBar({
     super.key,
@@ -12,6 +14,7 @@ class BottomNavBar extends StatelessWidget {
     required this.onTap,
     this.isVisible = true,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,7 @@ class BottomNavBar extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
-                    height: 70,
+                    height: 62,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -83,6 +86,7 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 
+
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = currentIndex == index;
     return GestureDetector(
@@ -98,8 +102,8 @@ class BottomNavBar extends StatelessWidget {
               icon,
               size: 22,
               color: isSelected
-                  ? const Color(0xFFFFFFFF)
-                  : Colors.white.withOpacity(0.6),
+                  ? const Color(0xFF00B4D8) // CHANGED: bright cyan-blue
+                  : const Color(0xB300B4D8), // CHANGED: 70% opacity
             ),
             const SizedBox(height: 4),
             Text(
@@ -108,8 +112,8 @@ class BottomNavBar extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected
-                    ? const Color(0xFFFFFFFF)
-                    : Colors.white.withOpacity(0.6),
+                    ? const Color(0xFF00B4D8) // CHANGED: bright cyan-blue
+                    : const Color(0xB300B4D8), // CHANGED: 70% opacity
               ),
             ),
           ],
@@ -119,6 +123,7 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
+
 // Custom clipper to create the center cutout
 class _NavBarClipper extends CustomClipper<Path> {
   @override
@@ -127,11 +132,14 @@ class _NavBarClipper extends CustomClipper<Path> {
     const cutoutRadius = 38.0; // Radius of the circular cutout
     final cutoutCenter = size.width / 2; // Center X position
 
+
     // Start from top-left
     path.moveTo(0, 0);
 
+
     // Top edge until the cutout
     path.lineTo(cutoutCenter - cutoutRadius - 10, 0);
+
 
     // Create the curved cutout (semicircle notch)
     path.quadraticBezierTo(
@@ -154,20 +162,26 @@ class _NavBarClipper extends CustomClipper<Path> {
       0,
     );
 
+
     // Complete the top edge
     path.lineTo(size.width, 0);
+
 
     // Right edge
     path.lineTo(size.width, size.height);
 
+
     // Bottom edge
     path.lineTo(0, size.height);
+
 
     // Close the path
     path.close();
 
+
     return path;
   }
+
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;

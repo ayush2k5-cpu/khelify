@@ -21,6 +21,7 @@ dependencies:
   cloud_firestore: ^4.15.6
 
   cached_network_image: ^3.3.1
+  modal_bottom_sheet: ^3.0.0
 
 dev_dependencies:
   flutter_test:

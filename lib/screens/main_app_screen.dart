@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/record_modal_sheet.dart';
+import '../screens/record_full_modal.dart'; // import this!
 import '../screens/connect_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
@@ -15,6 +15,7 @@ class MainAppScreen extends StatefulWidget {
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
   bool _isNavBarVisible = true;
+  bool _isRecordOverlayVisible = false; // ADDED!
   final ScrollController _scrollController = ScrollController();
   double _lastScrollPosition = 0;
 
@@ -35,30 +36,27 @@ class _MainAppScreenState extends State<MainAppScreen> {
     final currentScroll = _scrollController.position.pixels;
     final scrollDelta = currentScroll - _lastScrollPosition;
 
-    // Hide nav when scrolling down, show when scrolling up
     if (scrollDelta > 5 && _isNavBarVisible) {
       setState(() => _isNavBarVisible = false);
     } else if (scrollDelta < -5 && !_isNavBarVisible) {
       setState(() => _isNavBarVisible = true);
     }
-
-    // Always show at top
     if (currentScroll <= 0 && !_isNavBarVisible) {
       setState(() => _isNavBarVisible = true);
     }
-
     _lastScrollPosition = currentScroll;
   }
 
   @override
   Widget build(BuildContext context) {
+    final recordOverlayHeight = MediaQuery.of(context).size.height * 0.85;
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 135, 98, 98),   // <- ONLY THIS LINE CHANGED  
+      backgroundColor: const Color.fromARGB(255, 135, 98, 98),
       body: Container(
-        color: Colors.white,            // <- THIS LINE CHANGES THE BACKGROUND COLOR  
+        color: Colors.white,
         child: Stack(
           children: [
-            // Main content with scroll controller
             Positioned.fill(
               child: IndexedStack(
                 index: _currentIndex,
@@ -71,13 +69,86 @@ class _MainAppScreenState extends State<MainAppScreen> {
                 ],
               ),
             ),
-            // Floating record button - adjusts position based on nav visibility
+
+            // ========== Overlay Record Section ========== 
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOut,
+              left: 0,
+              right: 0,
+              bottom: _isRecordOverlayVisible ? 0 : -recordOverlayHeight - 32,
+              height: recordOverlayHeight + 32, // for shadow/margin
+              child: IgnorePointer(
+                ignoring: !_isRecordOverlayVisible,
+                child: GestureDetector(
+                  onVerticalDragUpdate: (details) {
+                    if (details.delta.dy > 8) {
+                      setState(() => _isRecordOverlayVisible = false);
+                    }
+                  },
+                  child: Material(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: recordOverlayHeight,
+                          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 24,
+                                offset: const Offset(0, -8),
+                              ),
+                            ],
+                          ),
+                          child: RecordFullModal(
+                            onClose: () => setState(() => _isRecordOverlayVisible = false),
+                          ),
+                        ),
+                        // Close button (optional: top right)
+                        Positioned(
+                          right: 16,
+                          top: 24,
+                          child: IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 28),
+                            onPressed: () => setState(() => _isRecordOverlayVisible = false),
+                          ),
+                        ),
+                        // Drag handle
+                        Positioned(
+                          top: 10,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Floating record button
             AnimatedPositioned(
               duration: const Duration(milliseconds: 200),
               bottom: _isNavBarVisible ? 30 : 15,
               left: MediaQuery.of(context).size.width / 2 - 30,
               child: _buildFloatingRecordButton(),
             ),
+
             // Bottom nav bar with auto-hide
             Positioned(
               bottom: 0,
@@ -106,33 +177,19 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 
   void _onNavTap(int index) {
-    if (index == 2) {
-      _onRecordSwipeUp();
-    } else {
-      setState(() {
-        _currentIndex = index;
-        _isNavBarVisible = true; // Always show nav when switching tabs
-      });
+    if (_isRecordOverlayVisible) {
+      setState(() => _isRecordOverlayVisible = false);
     }
+    setState(() {
+      _currentIndex = index;
+      _isNavBarVisible = true;
+    });
   }
 
-  void _onRecordTap() {
-    _onRecordSwipeUp();
-  }
+  void _onRecordTap() => _onRecordSwipeUp();
 
   void _onRecordSwipeUp() {
-    showRecordModal(
-      context,
-      onDrillSelected: (drill) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Starting ${drill.name}... 🔥'),
-            backgroundColor: KhelifyColors.championGold,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
-    );
+    setState(() => _isRecordOverlayVisible = true);
   }
 
   Widget _buildKhojjooScreen() {
@@ -231,13 +288,13 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 }
 
+// PulsingButton class is unchanged from your setup!
 class _PulsingButton extends StatefulWidget {
   @override
   State<_PulsingButton> createState() => _PulsingButtonState();
 }
 
-class _PulsingButtonState extends State<_PulsingButton>
-    with SingleTickerProviderStateMixin {
+class _PulsingButtonState extends State<_PulsingButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;
@@ -253,7 +310,6 @@ class _PulsingButtonState extends State<_PulsingButton>
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-
     _glowAnimation = Tween<double>(begin: 18, end: 40).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
