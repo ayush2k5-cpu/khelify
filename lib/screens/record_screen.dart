@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../themes/khelify_theme.dart';
 import '../models/post.dart';
 
 class RecordScreen extends StatefulWidget {
   final Drill? selectedDrill;
   
   const RecordScreen({Key? key, this.selectedDrill}) : super(key: key);
-  
+
   @override
   State<RecordScreen> createState() => _RecordScreenState();
 }
@@ -14,8 +13,8 @@ class RecordScreen extends StatefulWidget {
 class _RecordScreenState extends State<RecordScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
-  String selectedSport = 'Cricket';
-  String selectedSkill = 'Batting';
+  String selectedSport = 'Football';
+  String selectedSkill = 'Shooting';
   final TextEditingController descriptionController = TextEditingController();
   
   // State variables
@@ -26,16 +25,20 @@ class _RecordScreenState extends State<RecordScreen>
   String? _videoUrl;
 
   final Map<String, List<String>> sportSkills = {
+    'Football': ['Shooting', 'Dribbling', 'Passing'],
     'Cricket': ['Batting', 'Bowling', 'Fielding'],
     'Badminton': ['Smash', 'Clear', 'Drop Shot'],
     'Basketball': ['Shooting', 'Dribbling', 'Defense'],
     'Tennis': ['Serve', 'Forehand', 'Backhand'],
-    'Football': ['Shooting', 'Dribbling', 'Passing'],
   };
 
   @override
   void initState() {
     super.initState();
+    print('🎬 DEBUG: RecordScreen initState called');
+    print('🎬 DEBUG: Selected Drill: ${widget.selectedDrill?.name}');
+    print('🎬 DEBUG: Selected Drill Sport: ${widget.selectedDrill?.sport}');
+    
     _pulseController = AnimationController(
       duration: Duration(seconds: 2),
       vsync: this,
@@ -49,31 +52,37 @@ class _RecordScreenState extends State<RecordScreen>
 
   void _autoSelectDrill() {
     if (widget.selectedDrill != null) {
+      print('🎬 DEBUG: Auto-selecting drill: ${widget.selectedDrill!.name}');
       setState(() {
         selectedSport = widget.selectedDrill!.sport;
         selectedSkill = _mapDrillToSkill(widget.selectedDrill!);
       });
+      print('🎬 DEBUG: Auto-selected - Sport: $selectedSport, Skill: $selectedSkill');
     }
   }
 
   String _mapDrillToSkill(Drill drill) {
-    switch (drill.name.toLowerCase()) {
-      case '40m sprint':
-      case 'sprint':
-        return 'Shooting';
-      case 'vertical jump':
-      case 'jump':
-        return 'Shooting';
-      case 'batting drill':
-        return 'Batting';
-      case 'bowling drill':
-        return 'Bowling';
-      case 'smash drill':
-        return 'Smash';
-      case 'clear drill':
-        return 'Clear';
-      default:
-        return sportSkills[drill.sport]?.first ?? 'Batting';
+    final drillName = drill.name.toLowerCase();
+    print('🎬 DEBUG: Mapping drill to skill: $drillName');
+    
+    if (drillName.contains('sprint') || drillName.contains('40m') || drillName.contains('100m')) {
+      return 'Shooting';
+    } else if (drillName.contains('jump') || drillName.contains('vertical')) {
+      return 'Shooting';
+    } else if (drillName.contains('batting')) {
+      return 'Batting';
+    } else if (drillName.contains('bowling')) {
+      return 'Bowling';
+    } else if (drillName.contains('smash')) {
+      return 'Smash';
+    } else if (drillName.contains('clear')) {
+      return 'Clear';
+    } else if (drillName.contains('dribbling') || drillName.contains('dribble')) {
+      return 'Dribbling';
+    } else if (drillName.contains('passing') || drillName.contains('pass')) {
+      return 'Passing';
+    } else {
+      return sportSkills[drill.sport]?.first ?? 'Shooting';
     }
   }
 
@@ -86,6 +95,8 @@ class _RecordScreenState extends State<RecordScreen>
   // SIMULATED RECORDING FUNCTIONALITY
   Future<void> _recordVideo() async {
     try {
+      print('🎬 DEBUG: Starting video recording for drill: ${widget.selectedDrill?.name}');
+      
       setState(() {
         _isRecording = true;
       });
@@ -131,12 +142,13 @@ class _RecordScreenState extends State<RecordScreen>
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ AI Analysis completed!'),
+          content: Text('✅ AI Analysis completed for ${widget.selectedDrill?.name}!'),
           backgroundColor: Colors.green,
         ),
       );
 
     } catch (e) {
+      print('🎬 DEBUG: Recording error: $e');
       setState(() {
         _isRecording = false;
         _isUploading = false;
@@ -155,6 +167,8 @@ class _RecordScreenState extends State<RecordScreen>
   // SIMULATED UPLOAD FUNCTIONALITY
   Future<void> _uploadExistingVideo() async {
     try {
+      print('🎬 DEBUG: Uploading existing video for drill: ${widget.selectedDrill?.name}');
+      
       setState(() {
         _isUploading = true;
       });
@@ -192,12 +206,13 @@ class _RecordScreenState extends State<RecordScreen>
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Video analyzed successfully!'),
+          content: Text('✅ Video analyzed successfully for ${widget.selectedDrill?.name}!'),
           backgroundColor: Colors.green,
         ),
       );
 
     } catch (e) {
+      print('🎬 DEBUG: Upload error: $e');
       setState(() {
         _isUploading = false;
         _isAnalyzing = false;
@@ -220,9 +235,11 @@ class _RecordScreenState extends State<RecordScreen>
       return;
     }
 
+    print('🎬 DEBUG: Submitting assessment for drill: ${widget.selectedDrill?.name}');
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Assessment submitted with AI analysis! 🎉'),
+        content: Text('${widget.selectedDrill?.name} assessment submitted with AI analysis! 🎉'),
         backgroundColor: Color(0xFFFFD700),
       ),
     );
@@ -231,6 +248,52 @@ class _RecordScreenState extends State<RecordScreen>
     Future.delayed(Duration(seconds: 2), () {
       Navigator.pop(context);
     });
+  }
+
+  Widget _buildDrillInfo() {
+    if (widget.selectedDrill == null) {
+      return Container();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Color(0xFF1E3A8A).withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Color(0xFF4A90E2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SELECTED DRILL',
+            style: TextStyle(
+              fontSize: 12,
+              color: Color(0xFF4A90E2),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            widget.selectedDrill!.name,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            '${widget.selectedDrill!.sport} • ${widget.selectedDrill!.estimatedDuration}s • ${widget.selectedDrill!.difficulty}',
+            style: TextStyle(
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildRecordButton() {
@@ -244,6 +307,8 @@ class _RecordScreenState extends State<RecordScreen>
 
     return Column(
       children: [
+        _buildDrillInfo(),
+        
         // RECORD NEW VIDEO BUTTON
         ScaleTransition(
           scale: Tween<double>(begin: 0.95, end: 1).animate(
@@ -292,13 +357,14 @@ class _RecordScreenState extends State<RecordScreen>
                   SizedBox(height: 20),
                   Text(
                     widget.selectedDrill != null 
-                      ? 'Record New Video: ${widget.selectedDrill!.name}' 
+                      ? 'Record: ${widget.selectedDrill!.name}' 
                       : 'Record New Video',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 8),
                   Text(
@@ -354,34 +420,49 @@ class _RecordScreenState extends State<RecordScreen>
   }
 
   Widget _buildLoadingState(String text, IconData icon) {
-    return Container(
-      height: 280,
-      decoration: BoxDecoration(
-        color: Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Color(0xFF4A90E2).withOpacity(0.3),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A90E2)),
-          ),
-          SizedBox(height: 20),
-          Icon(icon, size: 40, color: Color(0xFF4A90E2)),
-          SizedBox(height: 10),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white,
+    return Column(
+      children: [
+        _buildDrillInfo(),
+        Container(
+          height: 280,
+          decoration: BoxDecoration(
+            color: Color(0xFF2C2C2E),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Color(0xFF4A90E2).withOpacity(0.3),
+              width: 2,
             ),
           ),
-        ],
-      ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A90E2)),
+              ),
+              SizedBox(height: 20),
+              Icon(icon, size: 40, color: Color(0xFF4A90E2)),
+              SizedBox(height: 10),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+              if (widget.selectedDrill != null) ...[
+                SizedBox(height: 10),
+                Text(
+                  'for ${widget.selectedDrill!.name}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -449,6 +530,8 @@ class _RecordScreenState extends State<RecordScreen>
 
   @override
   Widget build(BuildContext context) {
+    print('🎬 DEBUG: RecordScreen build method - Selected Drill: ${widget.selectedDrill?.name}');
+    
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

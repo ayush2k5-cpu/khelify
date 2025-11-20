@@ -218,6 +218,7 @@ class _RecordModalSheetState extends State<RecordModalSheet>
     
     return GestureDetector(
       onTap: () {
+        print('🎬 DEBUG: Drill selected: ${drill.name}');
         setState(() {
           selectedDrill = drill;
         });
@@ -437,9 +438,23 @@ class _RecordModalSheetState extends State<RecordModalSheet>
       ),
       child: ElevatedButton(
         onPressed: () {
+          print('🎬 DEBUG: START RECORDING button tapped');
+          
           if (selectedDrill != null) {
-            widget.onDrillSelected?.call(selectedDrill!);
+            print('🎬 DEBUG: Calling onDrillSelected with ${selectedDrill!.name}');
+            
+            // Check if callback exists
+            if (widget.onDrillSelected != null) {
+              widget.onDrillSelected!(selectedDrill!);
+              print('🎬 DEBUG: Callback executed successfully');
+            } else {
+              print('🎬 DEBUG: ERROR: onDrillSelected callback is NULL!');
+            }
+            
             Navigator.pop(context);
+            print('🎬 DEBUG: Modal closed');
+          } else {
+            print('🎬 DEBUG: ERROR: No drill selected!');
           }
         },
         style: ElevatedButton.styleFrom(
@@ -481,6 +496,7 @@ class _RecordModalSheetState extends State<RecordModalSheet>
 // ══════════════════════════════════════════════════════════
 
 void showRecordModal(BuildContext context, {Function(Drill)? onDrillSelected}) {
+  print('🎬 DEBUG: showRecordModal called');
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,

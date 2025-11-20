@@ -3,13 +3,7 @@ import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
 import 'record_modal_sheet.dart';
-import 'record_screen.dart'; // ADD THIS IMPORT
-
-// ══════════════════════════════════════════════════════════
-// MAIN APP SCREEN
-// Tab navigation + Floating Record Button
-// Home | Khojjoo | Record | Reel | Stats
-// ══════════════════════════════════════════════════════════
+import 'record_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
   const MainAppScreen({Key? key}) : super(key: key);
@@ -20,6 +14,7 @@ class MainAppScreen extends StatefulWidget {
 
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
+  Drill? _selectedDrill; // Store selected drill at state level
 
   @override
   Widget build(BuildContext context) {
@@ -27,26 +22,23 @@ class _MainAppScreenState extends State<MainAppScreen> {
       backgroundColor: KhelifyColors.scaffoldBackground,
       body: Stack(
         children: [
-          // Main Content (Tab Views)
           IndexedStack(
             index: _currentIndex,
             children: [
-              HomeScreen(), // Tab 0
-              _buildKhojjooScreen(), // Tab 1
-              _buildRecordScreen(), // Tab 2 (handled by floating button)
-              _buildReelScreen(), // Tab 3
-              _buildStatsScreen(), // Tab 4
+              HomeScreen(),
+              _buildKhojjooScreen(),
+              _buildRecordScreen(),
+              _buildReelScreen(),
+              _buildStatsScreen(),
             ],
           ),
 
-          // Floating Record Button
           Positioned(
             bottom: 55,
             left: MediaQuery.of(context).size.width / 2 - 28,
             child: _buildFloatingRecordButton(),
           ),
 
-          // Bottom Navigation Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -61,8 +53,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  // ========== FLOATING RECORD BUTTON ==========
-
   Widget _buildFloatingRecordButton() {
     return GestureDetector(
       onTap: _onRecordTap,
@@ -75,11 +65,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  // ========== NAV HANDLING ==========
-
   void _onNavTap(int index) {
     if (index == 2) {
-      // Record tab - show modal instead
       _onRecordSwipeUp();
     } else {
       setState(() {
@@ -93,35 +80,36 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 
   void _onRecordSwipeUp() {
-    // Use the showRecordModal function from record_modal_sheet.dart
     showRecordModal(
       context,
       onDrillSelected: (drill) {
-        print('🎥 Selected drill: ${drill.name}');
+        print('🎬 DEBUG: Drill selected in MainApp: ${drill.name}');
         
-        // NAVIGATE TO RECORD SCREEN IMMEDIATELY
+        // Store the selected drill and navigate
+        setState(() {
+          _selectedDrill = drill;
+        });
+        
+        // Close modal and navigate to RecordScreen
+        Navigator.pop(context);
+        
+        // Navigate to RecordScreen with the selected drill
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => RecordScreen(selectedDrill: drill),
           ),
-        );
-        
-        // Optional: Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Starting ${drill.name} with AI Analysis... 🔥'),
-            backgroundColor: KhelifyColors.championGold,
-            behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ).then((_) {
+          // Clear selection when returning from RecordScreen
+          setState(() {
+            _selectedDrill = null;
+          });
+        });
       },
     );
   }
 
   // ========== PLACEHOLDER SCREENS ==========
-
   Widget _buildKhojjooScreen() {
     return _buildPlaceholder(
       icon: '📍',
@@ -228,10 +216,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════
-// PULSING BUTTON ANIMATION
-// ══════════════════════════════════════════════════════════
 
 class _PulsingButton extends StatefulWidget {
   @override
