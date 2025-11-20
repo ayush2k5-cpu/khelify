@@ -3,6 +3,7 @@ import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
 import '../screens/record_modal_sheet.dart';
+import '../screens/stats_screen.dart';
 
 // ══════════════════════════════════════════════════════════
 // MAIN APP SCREEN
@@ -34,7 +35,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
               _buildKhojjooScreen(), // Tab 1
               _buildRecordScreen(), // Tab 2 (handled by floating button)
               _buildReelScreen(), // Tab 3
-              _buildStatsScreen(), // Tab 4
+              StatsScreen(), // Tab 4
             ],
           ),
 
@@ -115,7 +116,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
       icon: '📍',
       title: 'KHOJJOO',
       subtitle: 'Discover sports academies near you',
-      description: 'Find Khelo India centers, private academies, and training facilities in your area.',
+      description:
+          'Find Khelo India centers, private academies, and training facilities in your area.',
     );
   }
 
@@ -142,7 +144,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
       icon: '📊',
       title: 'STATS',
       subtitle: 'Your performance dashboard',
-      description: 'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
+      description:
+          'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
     );
   }
 
