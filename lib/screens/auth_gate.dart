@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
-import 'main_app_screen.dart';
+import 'role_selection_screen.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -25,11 +25,11 @@ class AuthGate extends StatelessWidget {
 
         // Not logged in → Show Login
         if (!snapshot.hasData) {
-          return LoginScreen();
+          return const LoginScreen();
         }
 
-        // Logged in → Show Main App
-        return const MainAppScreen();
+        // Logged in → Show Role Selection
+        return  RoleSelectionScreen();
       },
     );
   }
