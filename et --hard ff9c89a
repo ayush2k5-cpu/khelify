@@ -1,0 +1,49 @@
+[33m2596742[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdashboard-gg[m[33m, [m[1;31morigin/dashboard-gg[m[33m, [m[1;31morigin/NEW_Dashboard[m[33m, [m[1;32mNEW_Dashboard[m[33m)[m HEAD@{0}: reset: moving to 25967423f54683ac50b33440f9f2900a079d27b0
+[33m2596742[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdashboard-gg[m[33m, [m[1;31morigin/dashboard-gg[m[33m, [m[1;31morigin/NEW_Dashboard[m[33m, [m[1;32mNEW_Dashboard[m[33m)[m HEAD@{1}: checkout: moving from NEW_Dashboard to dashboard-gg
+[33m2596742[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdashboard-gg[m[33m, [m[1;31morigin/dashboard-gg[m[33m, [m[1;31morigin/NEW_Dashboard[m[33m, [m[1;32mNEW_Dashboard[m[33m)[m HEAD@{2}: checkout: moving from dashboard-gg to NEW_Dashboard
+[33m2596742[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdashboard-gg[m[33m, [m[1;31morigin/dashboard-gg[m[33m, [m[1;31morigin/NEW_Dashboard[m[33m, [m[1;32mNEW_Dashboard[m[33m)[m HEAD@{3}: checkout: moving from dashboard-gg to dashboard-gg
+[33m2596742[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdashboard-gg[m[33m, [m[1;31morigin/dashboard-gg[m[33m, [m[1;31morigin/NEW_Dashboard[m[33m, [m[1;32mNEW_Dashboard[m[33m)[m HEAD@{4}: reset: moving to origin/dashboard-gg
+[33mff9c89a[m HEAD@{5}: commit: feat(ui): RECORD_DRILL -Glassmorphism drill carousel, vibrant card styling, and arrow navigation
+[33m3949c42[m HEAD@{6}: commit: feat: restore white app background and prep for easy color changes
+[33m200e1a9[m HEAD@{7}: commit: Checkpoint: all widgets, mock data, and feed rewiring complete
+[33md9a9339[m HEAD@{8}: reset: moving to HEAD
+[33md9a9339[m HEAD@{9}: checkout: moving from dashboard-gg to dashboard-gg
+[33md9a9339[m HEAD@{10}: checkout: moving from dashboard-gg to dashboard-gg
+[33md9a9339[m HEAD@{11}: commit: Add feed card design and glass header top section
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{12}: checkout: moving from master to dashboard-gg
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{13}: reset: moving to 8eff90c009f5cfb3607a258121b2436527a26fd6
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{14}: reset: moving to 8eff90c009f5cfb3607a258121b2436527a26fd6
+[33ma7b3efd[m HEAD@{15}: checkout: moving from cb888a9b71cdff278f4bd0494402c7ac7903728b to master
+[33mcb888a9[m[33m ([m[1;32mfeature/video-ai-processing[m[33m)[m HEAD@{16}: checkout: moving from 55226ed4211885b191078b12bdb61284ace1d3e8 to cb888a9b71cdff278f4bd0494402c7ac7903728b
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{17}: reset: moving to 55226ed4211885b191078b12bdb61284ace1d3e8
+[33m97a0d78[m HEAD@{18}: reset: moving to HEAD~
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{19}: reset: moving to HEAD~
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{20}: checkout: moving from day2/auth-evening to 55226ed4211885b191078b12bdb61284ace1d3e8^0
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{21}: checkout: moving from 55226ed4211885b191078b12bdb61284ace1d3e8 to day2/auth-evening
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{22}: reset: moving to 55226ed4211885b191078b12bdb61284ace1d3e8
+[33m16de0e5[m HEAD@{23}: revert: Revert "feat: Card styling + Firebase init + SDK fix"
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{24}: checkout: moving from day2/auth-evening to 55226ed4211885b191078b12bdb61284ace1d3e8
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{25}: checkout: moving from main to day2/auth-evening
+[33mc63140d[m[33m ([m[1;32mmain[m[33m)[m HEAD@{26}: checkout: moving from feature/video-ai-processing to main
+[33mcb888a9[m[33m ([m[1;32mfeature/video-ai-processing[m[33m)[m HEAD@{27}: checkout: moving from day2/auth-evening to feature/video-ai-processing
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{28}: checkout: moving from main to day2/auth-evening
+[33mc63140d[m[33m ([m[1;32mmain[m[33m)[m HEAD@{29}: pull origin main: Fast-forward
+[33m3edc816[m HEAD@{30}: checkout: moving from day2/auth-evening to main
+[33m55226ed[m[33m ([m[1;31morigin/day2/auth-evening[m[33m, [m[1;32mday2/auth-evening[m[33m)[m HEAD@{31}: commit: feat: Card styling + Firebase init + SDK fix
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{32}: checkout: moving from feature/video-ai-processing to day2/auth-evening
+[33mcb888a9[m[33m ([m[1;32mfeature/video-ai-processing[m[33m)[m HEAD@{33}: reset: moving to HEAD~1
+[33m5b2b090[m HEAD@{34}: commit: feat: Card styling + Firebase init + Android SDK fix
+[33mcb888a9[m[33m ([m[1;32mfeature/video-ai-processing[m[33m)[m HEAD@{35}: commit: feat: Card styling + Firebase init + Android SDK fix
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{36}: checkout: moving from day2/auth-evening to feature/video-ai-processing
+[33m8eff90c[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{37}: commit: Day 2: Granth - Complete premium UI with 7 screens, RED/BLACK/CREAM/TEAL theme
+[33m97a0d78[m HEAD@{38}: commit: Day 2: Granth - Complete premium UI with 7 screens, RED/BLACK/CREAM/TEAL theme
+[33m425d38d[m HEAD@{39}: commit (merge): Merge unrelated histories from main
+[33m979e211[m HEAD@{40}: checkout: moving from day2/auth-evening to day2/auth-evening
+[33m979e211[m HEAD@{41}: pull origin day2/auth-evening: Fast-forward
+[33mf2fda9d[m HEAD@{42}: reset: moving to HEAD
+[33mf2fda9d[m HEAD@{43}: checkout: moving from day2/auth-evening to day2/auth-evening
+[33mf2fda9d[m HEAD@{44}: commit: feat: login/signup UI with black+maroon red+gold theme
+[33m406df6f[m HEAD@{45}: commit: Force add all files - Ayush
+[33m6d2b4e5[m HEAD@{46}: commit: Day 2: Login screen dark theme - Ayush
+[33ma7b3efd[m HEAD@{47}: checkout: moving from master to day2/auth-evening
+[33ma7b3efd[m HEAD@{48}: commit (initial): Initial commit - Flutter Firebase setup
