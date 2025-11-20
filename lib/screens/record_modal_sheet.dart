@@ -147,34 +147,41 @@ class _RecordModalSheetState extends State<RecordModalSheet>
   // ========== SPORTS TAB ==========
   
   Widget _buildSportsTab() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Football Section
-          _buildSportSection(
-            sport: 'Football',
-            icon: '⚽',
-            drills: MockDataService.getDrillsBySport('Football'),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Football Section
+                _buildSportSection(
+                  sport: 'Football',
+                  icon: '⚽',
+                  drills: MockDataService.getDrillsBySport('Football'),
+                ),
+                
+                SizedBox(height: 24),
+                
+                // Badminton Section
+                _buildSportSection(
+                  sport: 'Badminton',
+                  icon: '🏸',
+                  drills: MockDataService.getDrillsBySport('Badminton'),
+                ),
+              ],
+            ),
           ),
-          
-          SizedBox(height: 24),
-          
-          // Badminton Section
-          _buildSportSection(
-            sport: 'Badminton',
-            icon: '🏸',
-            drills: MockDataService.getDrillsBySport('Badminton'),
+        ),
+        
+        // Start Recording Button (if drill selected)
+        if (selectedDrill != null)
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: _buildStartButton(),
           ),
-          
-          SizedBox(height: 32),
-          
-          // Start Recording Button (if drill selected)
-          if (selectedDrill != null)
-            _buildStartButton(),
-        ],
-      ),
+      ],
     );
   }
 
@@ -302,103 +309,101 @@ class _RecordModalSheetState extends State<RecordModalSheet>
   // ========== ESPORTS TAB (Coming Soon) ==========
   
   Widget _buildEsportsTab() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Game Controller Icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    KhelifyColors.championGold.withOpacity(0.2),
-                    KhelifyColors.sapphireBlue.withOpacity(0.2),
-                  ],
-                ),
-                border: Border.all(
-                  color: KhelifyColors.championGold,
-                  width: 2,
-                ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Game Controller Icon
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  KhelifyColors.championGold.withOpacity(0.2),
+                  KhelifyColors.sapphireBlue.withOpacity(0.2),
+                ],
               ),
-              child: Icon(
-                PhosphorIcons.gameController(PhosphorIconsStyle.fill),
-                size: 64,
+              border: Border.all(
                 color: KhelifyColors.championGold,
+                width: 2,
               ),
             ),
-            
-            SizedBox(height: 24),
-            
-            // Coming Soon Title
-            ShaderMask(
-              shaderCallback: (bounds) {
-                return KhelifyColors.goldGradient.createShader(bounds);
-              },
-              child: Text(
-                'COMING SOON!',
-                style: KhelifyTypography.heading1.copyWith(
-                  fontSize: 32,
-                  color: Colors.white,
+            child: Icon(
+              PhosphorIcons.gameController(PhosphorIconsStyle.fill),
+              size: 64,
+              color: KhelifyColors.championGold,
+            ),
+          ),
+          
+          SizedBox(height: 24),
+          
+          // Coming Soon Title
+          ShaderMask(
+            shaderCallback: (bounds) {
+              return KhelifyColors.goldGradient.createShader(bounds);
+            },
+            child: Text(
+              'COMING SOON!',
+              style: KhelifyTypography.heading1.copyWith(
+                fontSize: 32,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Description
+          Text(
+            'Esports drills will include:',
+            style: KhelifyTypography.bodyLarge.copyWith(
+              color: KhelifyColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Features List
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFeatureItem('🎯 BGMI Aim Training'),
+              _buildFeatureItem('🔫 Valorant Flick Practice'),
+              _buildFeatureItem('💥 CS2 Spray Control'),
+              _buildFeatureItem('🎮 And more...'),
+            ],
+          ),
+          
+          SizedBox(height: 32),
+          
+          // Notify Button
+          ElevatedButton(
+            onPressed: () {
+              // TODO: Add to notification list
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('You\'ll be notified when Esports launches!'),
+                  backgroundColor: KhelifyColors.sapphireBlue,
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: KhelifyColors.sapphireBlue,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            
-            SizedBox(height: 16),
-            
-            // Description
-            Text(
-              'Esports drills will include:',
-              style: KhelifyTypography.bodyLarge.copyWith(
-                color: KhelifyColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
+            child: Text(
+              'NOTIFY ME',
+              style: KhelifyTypography.button,
             ),
-            
-            SizedBox(height: 16),
-            
-            // Features List
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildFeatureItem('🎯 BGMI Aim Training'),
-                _buildFeatureItem('🔫 Valorant Flick Practice'),
-                _buildFeatureItem('💥 CS2 Spray Control'),
-                _buildFeatureItem('🎮 And more...'),
-              ],
-            ),
-            
-            SizedBox(height: 32),
-            
-            // Notify Button
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Add to notification list
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('You\'ll be notified when Esports launches!'),
-                    backgroundColor: KhelifyColors.sapphireBlue,
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: KhelifyColors.sapphireBlue,
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                'NOTIFY ME',
-                style: KhelifyTypography.button,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

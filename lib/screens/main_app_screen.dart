@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/record_modal_sheet.dart';
+import 'record_modal_sheet.dart';
+import 'record_screen.dart'; // ADD THIS IMPORT
 
 // ══════════════════════════════════════════════════════════
 // MAIN APP SCREEN
@@ -30,7 +31,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
           IndexedStack(
             index: _currentIndex,
             children: [
-              HomeScreen(), // Tab 0 - FIXED: no userRole here!
+              HomeScreen(), // Tab 0
               _buildKhojjooScreen(), // Tab 1
               _buildRecordScreen(), // Tab 2 (handled by floating button)
               _buildReelScreen(), // Tab 3
@@ -92,16 +93,27 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 
   void _onRecordSwipeUp() {
+    // Use the showRecordModal function from record_modal_sheet.dart
     showRecordModal(
       context,
       onDrillSelected: (drill) {
-        print('Selected drill: ${drill.name}');
-        // TODO: Navigate to camera screen
+        print('🎥 Selected drill: ${drill.name}');
+        
+        // NAVIGATE TO RECORD SCREEN IMMEDIATELY
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordScreen(selectedDrill: drill),
+          ),
+        );
+        
+        // Optional: Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Starting ${drill.name}... 🔥'),
+            content: Text('Starting ${drill.name} with AI Analysis... 🔥'),
             backgroundColor: KhelifyColors.championGold,
             behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
           ),
         );
       },
@@ -152,62 +164,65 @@ class _MainAppScreenState extends State<MainAppScreen> {
     required String subtitle,
     required String description,
   }) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              icon,
-              style: TextStyle(fontSize: 80),
-            ),
-            SizedBox(height: 24),
-            ShaderMask(
-              shaderCallback: (bounds) {
-                return KhelifyColors.goldGradient.createShader(bounds);
-              },
-              child: Text(
+    return Container(
+      color: KhelifyColors.scaffoldBackground,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                icon,
+                style: TextStyle(fontSize: 80),
+              ),
+              SizedBox(height: 24),
+              Text(
                 title,
-                style: KhelifyTypography.displayLarge.copyWith(
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: KhelifyTypography.bodyLarge.copyWith(
-                color: KhelifyColors.textSecondary,
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              description,
-              style: KhelifyTypography.bodyMedium.copyWith(
-                color: KhelifyColors.textTertiary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 32),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: KhelifyColors.cardDark,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: KhelifyColors.championGold,
-                  width: 1,
+              SizedBox(height: 8),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70,
                 ),
               ),
-              child: Text(
-                'Coming in next build!',
-                style: KhelifyTypography.bodySmall.copyWith(
-                  color: KhelifyColors.championGold,
+              SizedBox(height: 16),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 32),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: KhelifyColors.championGold,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  'Coming in next build!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: KhelifyColors.championGold,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
