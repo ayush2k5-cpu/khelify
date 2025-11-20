@@ -19,7 +19,7 @@ void main() {
   
   // Set status bar style
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
+    const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Colors.black,
@@ -31,7 +31,7 @@ void main() {
 }
 
 class KhelifyApp extends StatelessWidget {
-  const KhelifyApp({Key? key}) : super(key: key);
+  const KhelifyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,25 @@ class KhelifyApp extends StatelessWidget {
       title: 'KHELIFY',
       debugShowCheckedModeBanner: false,
       theme: KhelifyTheme.darkTheme,
-      home: MainAppScreen(),
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: NoGlowScrollBehavior(),
+          child: child!,
+        );
+      },
+      home: const MainAppScreen(),
     );
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+
+class NoGlowScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }
