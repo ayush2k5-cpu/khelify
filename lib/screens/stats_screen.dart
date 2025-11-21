@@ -38,7 +38,7 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF181D23),
+      backgroundColor: const Color.fromARGB(255, 2, 39, 48),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(14),

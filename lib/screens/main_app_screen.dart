@@ -4,12 +4,6 @@ import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
 import '../screens/record_modal_sheet.dart';
 import '../screens/stats_screen.dart';
-
-// ══════════════════════════════════════════════════════════
-// MAIN APP SCREEN
-// Tab navigation + Floating Record Button
-// Home | Khojjoo | Record | Reel | Stats
-// ══════════════════════════════════════════════════════════
 import '../screens/record_full_modal.dart'; // import this!
 import '../screens/connect_screen.dart';
 
@@ -23,7 +17,7 @@ class MainAppScreen extends StatefulWidget {
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
   bool _isNavBarVisible = true;
-  bool _isRecordOverlayVisible = false; // ADDED!
+  bool _isRecordOverlayVisible = false;
   final ScrollController _scrollController = ScrollController();
   double _lastScrollPosition = 0;
 
@@ -73,7 +67,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
                   _buildKhojjooScreen(),
                   _buildRecordScreen(),
                   _buildConnectScreen(),
-                  _buildStatsScreen(),
+                  StatsScreen(), // ← Changed: use real stats UI here!
                 ],
               ),
             ),
@@ -223,15 +217,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
     return const ConnectScreen();
   }
 
-  Widget _buildStatsScreen() {
-    return _buildPlaceholder(
-      icon: '📊',
-      title: 'STATS',
-      subtitle: 'Your performance dashboard',
-      description:
-          'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
-    );
-  }
+  // You can remove or ignore _buildStatsScreen if unused from now.
 
   Widget _buildPlaceholder({
     required String icon,
@@ -298,7 +284,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 }
 
-// PulsingButton class is unchanged from your setup!
+// PulsingButton class unchanged from before!
 class _PulsingButton extends StatefulWidget {
   @override
   State<_PulsingButton> createState() => _PulsingButtonState();
