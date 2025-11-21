@@ -20,13 +20,17 @@ dependencies:
   # Firebase
   firebase_auth: ^4.17.6
   cloud_firestore: ^4.15.6
-  firebase_storage: ^11.2.0  # for video uploads
+  firebase_storage: ^11.2.0
 
   # HTTP & Networking
-  http: ^1.1.0  # for AI API calls
+  http: ^1.1.0
 
-  # Camera & Media
-  image_picker: ^1.0.4  # for video recording
+  # Camera & Media - UPDATED FOR REAL CAMERA
+  camera: ^0.10.5+9
+  image_picker: ^1.0.4
+  video_player: ^2.8.1
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.1
 
   # Caching
   cached_network_image: ^3.3.1

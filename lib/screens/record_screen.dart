@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../models/post.dart';
+import '../services/ai_analysis_service.dart'; // ← ADD THIS IMPORT
 
 class RecordScreen extends StatefulWidget {
   final Drill? selectedDrill;
@@ -11,19 +16,30 @@ class RecordScreen extends StatefulWidget {
 }
 
 class _RecordScreenState extends State<RecordScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  
+  // Camera & Recording State
+  CameraController? _cameraController;
+  List<CameraDescription>? _cameras;
+  bool _isCameraInitialized = false;
+  bool _isRecording = false;
+  bool _isUploading = false;
+  bool _isAnalyzing = false;
+  
+  // Video State
+  XFile? _videoFile;
+  
+  // Analysis Results
+  Map<String, dynamic>? _analysisResults;
+  
+  // Animation
   late AnimationController _pulseController;
+  
+  // Sport/Skill Selection (Preserving original functionality)
   String selectedSport = 'Football';
   String selectedSkill = 'Shooting';
   final TextEditingController descriptionController = TextEditingController();
   
-  // State variables
-  bool _isRecording = false;
-  bool _isUploading = false;
-  bool _isAnalyzing = false;
-  Map<String, dynamic>? _analysisResults;
-  String? _videoUrl;
-
   final Map<String, List<String>> sportSkills = {
     'Football': ['Shooting', 'Dribbling', 'Passing'],
     'Cricket': ['Batting', 'Bowling', 'Fielding'],
@@ -35,6 +51,7 @@ class _RecordScreenState extends State<RecordScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     print('🎬 DEBUG: RecordScreen initState called');
     print('🎬 DEBUG: Selected Drill: ${widget.selectedDrill?.name}');
     print('🎬 DEBUG: Selected Drill Sport: ${widget.selectedDrill?.sport}');
@@ -44,10 +61,13 @@ class _RecordScreenState extends State<RecordScreen>
       vsync: this,
     )..repeat();
     
-    // AUTO-SELECT BASED ON DRILL
+    // AUTO-SELECT BASED ON DRILL (Preserved)
     if (widget.selectedDrill != null) {
       _autoSelectDrill();
     }
+    
+    // Initialize Camera
+    _initializeCamera();
   }
 
   void _autoSelectDrill() {
@@ -86,151 +106,263 @@ class _RecordScreenState extends State<RecordScreen>
     }
   }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
+  // CAMERA INITIALIZATION - NEW REAL FUNCTIONALITY
+  Future<void> _initializeCamera() async {
+    try {
+      print('📸 Requesting camera permissions...');
+      
+      // Request permissions
+      final cameraStatus = await Permission.camera.request();
+      final micStatus = await Permission.microphone.request();
+      
+      if (!cameraStatus.isGranted || !micStatus.isGranted) {
+        print('❌ Permissions denied');
+        if (mounted) _showPermissionDialog();
+        return;
+      }
+
+      print('✅ Permissions granted, initializing camera...');
+      
+      // Get available cameras
+      _cameras = await availableCameras();
+      if (_cameras == null || _cameras!.isEmpty) {
+        print('❌ No cameras found on device');
+        if (mounted) _showErrorDialog('No cameras found on this device');
+        return;
+      }
+
+      print('📸 Found ${_cameras!.length} camera(s)');
+
+      // Initialize back camera (index 0)
+      _cameraController = CameraController(
+        _cameras![0],
+        ResolutionPreset.high,
+        enableAudio: true,
+      );
+
+      await _cameraController!.initialize();
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isCameraInitialized = true;
+      });
+      
+      print('✅ Camera initialized successfully');
+    } catch (e) {
+      print('❌ Camera initialization error: $e');
+      if (mounted) {
+        _showErrorDialog('Camera initialization failed: ${e.toString()}');
+      }
+    }
   }
 
-  // SIMULATED RECORDING FUNCTIONALITY
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFF2C2C2E),
+        title: Text('Permissions Required', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Camera and microphone permissions are required to record videos for your assessments.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: Text('Open Settings', style: TextStyle(color: Color(0xFF4A90E2))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFF2C2C2E),
+        title: Text('Error', style: TextStyle(color: Colors.red)),
+        content: Text(message, style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK', style: TextStyle(color: Color(0xFF4A90E2))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // REAL VIDEO RECORDING FUNCTIONALITY
   Future<void> _recordVideo() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      _showErrorDialog('Camera not ready. Please wait...');
+      return;
+    }
+
+    if (_isRecording) {
+      // STOP RECORDING
+      await _stopRecording();
+    } else {
+      // START RECORDING
+      await _startRecording();
+    }
+  }
+
+  Future<void> _startRecording() async {
     try {
-      print('🎬 DEBUG: Starting video recording for drill: ${widget.selectedDrill?.name}');
+      print('🎬 Starting video recording...');
+      
+      await _cameraController!.startVideoRecording();
       
       setState(() {
         _isRecording = true;
+        _videoFile = null;
+        _analysisResults = null;
       });
-
-      // Simulate recording process
-      await Future.delayed(Duration(seconds: 2));
-
-      setState(() {
-        _isRecording = false;
-        _isUploading = true;
-      });
-
-      // Simulate upload process
-      await Future.delayed(Duration(seconds: 2));
-
-      setState(() {
-        _isUploading = false;
-        _isAnalyzing = true;
-      });
-
-      // Simulate AI analysis
-      await Future.delayed(Duration(seconds: 3));
-
-      setState(() {
-        _isAnalyzing = false;
-        _analysisResults = {
-          'results': {
-            'drill_type': widget.selectedDrill?.name ?? 'Vertical Jump',
-            'key_metrics': {
-              'estimated_jump_height_cm': '68.5',
-              'technique_score': '87/100',
-              'power_output': 'High',
-              'consistency': 'Good'
-            },
-            'feedback': [
-              'Great explosive power!',
-              'Work on landing technique',
-              'Excellent knee drive'
-            ]
-          }
-        };
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ AI Analysis completed for ${widget.selectedDrill?.name}!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-    } catch (e) {
-      print('🎬 DEBUG: Recording error: $e');
-      setState(() {
-        _isRecording = false;
-        _isUploading = false;
-        _isAnalyzing = false;
-      });
+      
+      print('✅ Recording started');
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Recording failed: $e'),
+          content: Text('🔴 Recording started...'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
+    } catch (e) {
+      print('❌ Error starting recording: $e');
+      _showErrorDialog('Failed to start recording: ${e.toString()}');
     }
   }
 
-  // SIMULATED UPLOAD FUNCTIONALITY
+  Future<void> _stopRecording() async {
+    try {
+      print('🎬 Stopping video recording...');
+      
+      final video = await _cameraController!.stopVideoRecording();
+      
+      setState(() {
+        _isRecording = false;
+        _videoFile = video;
+      });
+      
+      print('✅ Recording stopped: ${video.path}');
+      print('📁 Video size: ${File(video.path).lengthSync()} bytes');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Recording saved! Analyzing...'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      // Auto-analyze after recording
+      await _analyzeVideo();
+    } catch (e) {
+      print('❌ Error stopping recording: $e');
+      setState(() {
+        _isRecording = false;
+      });
+      _showErrorDialog('Failed to stop recording: ${e.toString()}');
+    }
+  }
+
+  // UPLOAD EXISTING VIDEO (Preserved functionality)
   Future<void> _uploadExistingVideo() async {
     try {
-      print('🎬 DEBUG: Uploading existing video for drill: ${widget.selectedDrill?.name}');
+      print('📤 Opening gallery to select video...');
+      
+      final ImagePicker picker = ImagePicker();
+      final XFile? video = await picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: Duration(minutes: 2),
+      );
+      
+      if (video == null) {
+        print('ℹ️ No video selected');
+        return;
+      }
+      
+      print('✅ Video selected: ${video.path}');
+      
+      setState(() {
+        _videoFile = video;
+      });
+      
+      await _analyzeVideo();
+    } catch (e) {
+      print('❌ Error uploading video: $e');
+      _showErrorDialog('Failed to upload video: ${e.toString()}');
+    }
+  }
+
+  // ⭐ REAL AI ANALYSIS - UPDATED TO USE BACKEND
+  Future<void> _analyzeVideo() async {
+    if (_videoFile == null) return;
+    
+    try {
+      print('🔍 Starting REAL AI analysis with MediaPipe...');
       
       setState(() {
         _isUploading = true;
       });
-
-      // Simulate upload process
-      await Future.delayed(Duration(seconds: 2));
-
+      
+      await Future.delayed(Duration(milliseconds: 500));
+      
       setState(() {
         _isUploading = false;
         _isAnalyzing = true;
       });
-
-      // Simulate AI analysis
-      await Future.delayed(Duration(seconds: 3));
-
+      
+      // ⭐ CALL REAL AI BACKEND
+      final results = await AIAnalysisService.analyzeVideo(
+        videoPath: _videoFile!.path,
+        drillType: widget.selectedDrill?.name ?? 'Unknown',
+      );
+      
       setState(() {
         _isAnalyzing = false;
-        _analysisResults = {
-          'results': {
-            'drill_type': widget.selectedDrill?.name ?? 'Vertical Jump',
-            'key_metrics': {
-              'estimated_jump_height_cm': '72.1',
-              'technique_score': '92/100',
-              'power_output': 'Excellent',
-              'consistency': 'Very Good'
-            },
-            'feedback': [
-              'Outstanding technique!',
-              'Perfect landing form',
-              'Elite level performance'
-            ]
-          }
-        };
+        _analysisResults = {'results': results}; // Wrap in results key
       });
-
+      
+      print('✅ Real AI Analysis completed');
+      print('📊 Results: $results');
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Video analyzed successfully for ${widget.selectedDrill?.name}!'),
+          content: Text('✅ Real AI Analysis completed for ${widget.selectedDrill?.name ?? "video"}!'),
           backgroundColor: Colors.green,
         ),
       );
-
+      
     } catch (e) {
-      print('🎬 DEBUG: Upload error: $e');
+      print('❌ Analysis error: $e');
       setState(() {
         _isUploading = false;
         _isAnalyzing = false;
       });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Upload failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorDialog('AI analysis failed: ${e.toString()}\n\nMake sure the backend server is running and ngrok URL is correct.');
     }
   }
 
+  // SUBMIT ASSESSMENT (Preserved functionality)
   void _submitAssessment() {
     if (_analysisResults == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please record and analyze a video first!')),
+        SnackBar(
+          content: Text('Please record and analyze a video first!'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -239,16 +371,41 @@ class _RecordScreenState extends State<RecordScreen>
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${widget.selectedDrill?.name} assessment submitted with AI analysis! 🎉'),
+        content: Text('${widget.selectedDrill?.name ?? "Assessment"} submitted with AI analysis! 🎉'),
         backgroundColor: Color(0xFFFFD700),
       ),
     );
 
     // Navigate back after submission
     Future.delayed(Duration(seconds: 2), () {
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     });
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cameraController?.dispose();
+    _pulseController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = _cameraController;
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+    
+    if (state == AppLifecycleState.inactive) {
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initializeCamera();
+    }
+  }
+
+  // UI BUILDERS - Preserved with camera preview
 
   Widget _buildDrillInfo() {
     if (widget.selectedDrill == null) {
@@ -296,124 +453,180 @@ class _RecordScreenState extends State<RecordScreen>
     );
   }
 
+  Widget _buildCameraPreview() {
+    if (!_isCameraInitialized || _cameraController == null) {
+      return Container(
+        height: 400,
+        decoration: BoxDecoration(
+          color: Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Color(0xFF4A90E2).withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A90E2)),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Initializing camera...',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      height: 400,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _isRecording ? Colors.red : Color(0xFF4A90E2),
+          width: _isRecording ? 4 : 2,
+        ),
+        boxShadow: _isRecording ? [
+          BoxShadow(
+            color: Colors.red.withOpacity(0.5),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ] : [],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          children: [
+            CameraPreview(_cameraController!),
+            if (_isRecording)
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.fiber_manual_record, color: Colors.white, size: 12),
+                      SizedBox(width: 6),
+                      Text(
+                        'REC',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRecordButton() {
-    if (_isRecording) {
-      return _buildLoadingState('Recording...', Icons.videocam);
-    } else if (_isUploading) {
-      return _buildLoadingState('Uploading...', Icons.cloud_upload);
-    } else if (_isAnalyzing) {
-      return _buildLoadingState('AI Analyzing...', Icons.psychology);
+    if (_isUploading || _isAnalyzing) {
+      return _buildLoadingState(
+        _isUploading ? 'Uploading...' : 'AI Analyzing...',
+        _isUploading ? Icons.cloud_upload : Icons.psychology,
+      );
     }
 
     return Column(
       children: [
         _buildDrillInfo(),
         
-        // RECORD NEW VIDEO BUTTON
-        ScaleTransition(
-          scale: Tween<double>(begin: 0.95, end: 1).animate(
-            CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-          ),
-          child: GestureDetector(
-            onTap: _recordVideo,
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2A1A1A), Color(0xFF1A1A1A)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Color(0xFF4A90E2).withOpacity(0.3),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFF4A90E2).withOpacity(0.2),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ],
+        // Camera Preview
+        _buildCameraPreview(),
+        
+        SizedBox(height: 24),
+        
+        // Record/Upload Controls
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // RECORD BUTTON
+            ScaleTransition(
+              scale: Tween<double>(begin: 0.95, end: 1.05).animate(
+                CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF4A90E2).withOpacity(0.1),
-                      border: Border.all(
-                        color: Color(0xFF4A90E2),
-                        width: 2,
+              child: GestureDetector(
+                onTap: _recordVideo,
+                child: Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _isRecording ? Colors.red : Color(0xFF4A90E2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_isRecording ? Colors.red : Color(0xFF4A90E2)).withOpacity(0.5),
+                        blurRadius: 20,
+                        spreadRadius: 2,
                       ),
-                    ),
-                    child: Icon(
-                      Icons.videocam,
-                      size: 56,
-                      color: Color(0xFF4A90E2),
-                    ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    widget.selectedDrill != null 
-                      ? 'Record: ${widget.selectedDrill!.name}' 
-                      : 'Record New Video',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Icon(
+                    _isRecording ? Icons.stop : Icons.videocam,
+                    size: 40,
+                    color: Colors.white,
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Tap to start recording',
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            
+            // UPLOAD BUTTON
+            GestureDetector(
+              onTap: _uploadExistingVideo,
+              child: Container(
+                height: 65,
+                width: 65,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFFD700),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFFFD700).withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.upload,
+                  size: 30,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
         ),
         
         SizedBox(height: 16),
         
-        // UPLOAD EXISTING VIDEO BUTTON
-        GestureDetector(
-          onTap: _uploadExistingVideo,
-          child: Container(
-            height: 80,
-            decoration: BoxDecoration(
-              color: Color(0xFF2C2C2E),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Color(0xFFFFD700).withOpacity(0.3),
-                width: 2,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.upload,
-                  size: 32,
-                  color: Color(0xFFFFD700),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Upload Existing Video',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+        // Instructions
+        Text(
+          _isRecording 
+            ? 'Tap stop when done recording' 
+            : widget.selectedDrill != null 
+              ? 'Record: ${widget.selectedDrill!.name}'
+              : 'Tap camera to record or upload existing video',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -490,14 +703,14 @@ class _RecordScreenState extends State<RecordScreen>
           ),
           SizedBox(height: 12),
           Text(
-            'Drill: ${_analysisResults!['results']?['drill_type'] ?? 'N/A'}',
+            'Drill: ${_analysisResults!['results']?['drill_type'] ?? _analysisResults!['results']?['key_metrics']?['note'] ?? 'N/A'}',
             style: TextStyle(
               color: Colors.white,
             ),
           ),
           SizedBox(height: 8),
           Text(
-            'Jump Height: ${_analysisResults!['results']?['key_metrics']?['estimated_jump_height_cm'] ?? 'N/A'} cm',
+            'Jump Height: ${_analysisResults!['results']?['key_metrics']?['estimated_jump_height_cm'] ?? 'N/A'}',
             style: TextStyle(
               color: Colors.white,
             ),
@@ -509,20 +722,34 @@ class _RecordScreenState extends State<RecordScreen>
               color: Colors.white,
             ),
           ),
+          SizedBox(height: 8),
+          Text(
+            'Power Output: ${_analysisResults!['results']?['key_metrics']?['power_output'] ?? 'N/A'}',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Consistency: ${_analysisResults!['results']?['key_metrics']?['consistency'] ?? 'N/A'}',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           SizedBox(height: 12),
           Text(
-            'Feedback:',
+            'Analysis:',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          ...(_analysisResults!['results']?['feedback'] as List? ?? []).map((feedback) => 
-            Padding(
-              padding: EdgeInsets.only(top: 4),
-              child: Text('• $feedback', style: TextStyle(color: Colors.white70)),
-            )
-          ).toList(),
+          Text(
+            _analysisResults!['results']?['key_metrics']?['analysis'] ?? 
+            _analysisResults!['results']?['status'] ?? 
+            'Analysis completed',
+            style: TextStyle(color: Colors.white70),
+          ),
         ],
       ),
     );

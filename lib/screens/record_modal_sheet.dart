@@ -315,6 +315,8 @@ class _RecordModalSheetState extends State<RecordModalSheet>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          SizedBox(height: 60), // Add spacing from top
+          
           // Game Controller Icon
           Container(
             width: 120,
@@ -384,7 +386,6 @@ class _RecordModalSheetState extends State<RecordModalSheet>
           // Notify Button
           ElevatedButton(
             onPressed: () {
-              // TODO: Add to notification list
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('You\'ll be notified when Esports launches!'),
@@ -443,18 +444,21 @@ class _RecordModalSheetState extends State<RecordModalSheet>
           if (selectedDrill != null) {
             print('🎬 DEBUG: Calling onDrillSelected with ${selectedDrill!.name}');
             
-            // Check if callback exists
+            // Call the callback
             if (widget.onDrillSelected != null) {
               widget.onDrillSelected!(selectedDrill!);
               print('🎬 DEBUG: Callback executed successfully');
             } else {
               print('🎬 DEBUG: ERROR: onDrillSelected callback is NULL!');
             }
-            
-            Navigator.pop(context);
-            print('🎬 DEBUG: Modal closed');
           } else {
             print('🎬 DEBUG: ERROR: No drill selected!');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Please select a drill first!'),
+                backgroundColor: Colors.orange,
+              ),
+            );
           }
         },
         style: ElevatedButton.styleFrom(
@@ -501,6 +505,8 @@ void showRecordModal(BuildContext context, {Function(Drill)? onDrillSelected}) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
+    isDismissible: true,
+    enableDrag: true,
     builder: (context) => RecordModalSheet(
       onDrillSelected: onDrillSelected,
     ),

@@ -4,6 +4,7 @@ import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
 import 'record_modal_sheet.dart';
 import 'record_screen.dart';
+import '../models/post.dart';
 
 class MainAppScreen extends StatefulWidget {
   const MainAppScreen({Key? key}) : super(key: key);
