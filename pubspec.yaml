@@ -5,12 +5,13 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.3
+  sdk: '^3.5.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
+  
+  # UI & Icons
   cupertino_icons: ^1.0.8
   google_fonts: ^6.1.0
   lucide_icons: ^0.257.0
@@ -19,16 +20,16 @@ dependencies:
 
   firebase_auth: ^4.17.6
   cloud_firestore: ^4.15.6
-
   cached_network_image: ^3.3.1
   modal_bottom_sheet: ^3.0.0
+  percent_indicator: ^4.2.2
+  fl_chart: ^0.60.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^4.0.0
-  # I have REMOVED flutterfire_cli
 
 flutter:
   uses-material-design: true
