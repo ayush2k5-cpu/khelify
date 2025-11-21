@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class KhelifyColors {
   static const Color scaffoldBackground = Color(0xFFFFFFFF);
   static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color cardDark = Color(0xFF1E1E1E);  // You can remove or replace if not used
+  static const Color cardDark = Color(0xFF1E1E1E);
 
   static const Color sapphireBlue = Color(0xFF0F52BA);
   static const Color championGold = Color(0xFFFFD700);
@@ -20,6 +20,8 @@ class KhelifyColors {
   static const Color textTertiary = Color(0xFFB0BEC5);
 
   static const Color border = Color(0xFFE0E0E0);
+  static const Color glassBorder = Color(0x29FFFFFF); // Glassmorphic/translucent borders
+  static const Color inputBackground = Color(0xFFF4F6FA); // <-- Added for cards/fields etc
 
   static const LinearGradient goldGradient = LinearGradient(
     colors: [Color(0xFFFFD700), Color(0xFFFFB800)],
@@ -42,6 +44,7 @@ class KhelifyTypography {
   static const TextStyle bodyLarge = TextStyle(fontSize: 16);
   static const TextStyle bodyMedium = TextStyle(fontSize: 14);
   static const TextStyle bodySmall = TextStyle(fontSize: 12);
+  static const TextStyle caption = TextStyle(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.1);
   static const TextStyle button = TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
 }
 

@@ -10,17 +10,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # UI & Icons
   cupertino_icons: ^1.0.8
   google_fonts: ^6.1.0
   lucide_icons: ^0.257.0
   phosphor_flutter: ^2.0.1
-
-
   firebase_auth: ^4.17.6
   cloud_firestore: ^4.15.6
   cached_network_image: ^3.3.1
+  google_maps_flutter: ^2.4.0
   modal_bottom_sheet: ^3.0.0
   percent_indicator: ^4.2.2
   fl_chart: ^0.60.0
@@ -28,7 +27,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^4.0.0
 
 flutter:
