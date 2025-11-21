@@ -35,25 +35,12 @@ class KhelifyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: KhelifyTheme.lightTheme,
       home: const MainAppScreen(),
+      scrollBehavior: NoGlowScrollBehavior(), // Use your custom scroll behavior globally
     );
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════
-
-class NoGlowScrollBehavior extends ScrollBehavior {
-  @override
-  Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
-    return child;
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════
+// ========= UTILS =========
 
 class NoGlowScrollBehavior extends ScrollBehavior {
   @override
