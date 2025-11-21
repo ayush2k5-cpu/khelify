@@ -68,7 +68,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
                 index: _currentIndex,
                 children: [
                   HomeScreen(scrollController: _scrollController),
-                  _buildKhojjooScreen(),
+                  KhojjooScreen(), // SHOW real Khojjoo page here
                   _buildRecordScreen(),
                   _buildConnectScreen(),
                   StatsScreen(), // ← Changed: use real stats UI here!
@@ -198,16 +198,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
     setState(() => _isRecordOverlayVisible = true);
   }
 
-  Widget _buildKhojjooScreen() {
-    return _buildPlaceholder(
-      icon: '📍',
-      title: 'KHOJJOO',
-      subtitle: 'Discover sports academies near you',
-      description:
-          'Find Khelo India centers, private academies, and training facilities in your area.',
-    );
-  }
-
   Widget _buildRecordScreen() {
     return _buildPlaceholder(
       icon: '📹',
@@ -220,8 +210,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
   Widget _buildConnectScreen() {
     return const ConnectScreen();
   }
-
-  // You can remove or ignore _buildStatsScreen if unused from now.
 
   Widget _buildPlaceholder({
     required String icon,
