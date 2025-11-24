@@ -105,8 +105,8 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
           child: Text(
             title,
             style: isSelected
-                ? KhelifyTypography.button.copyWith(color: KhelifyColors.championGold)
-                : KhelifyTypography.bodyMedium.copyWith(color: KhelifyColors.textSecondary),
+                ? KhelifyTypography.button.copyWith(color: Colors.white)
+                : KhelifyTypography.bodyMedium.copyWith(color: Colors.white70),
           ),
         ),
       ),
@@ -181,7 +181,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                       children: [
                         Text(
                           "Nearby Academies",
-                          style: KhelifyTypography.heading2,
+                          style: KhelifyTypography.heading2.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 16),
                         _buildAcademyItem("Delhi Sports Academy", "4.5 km • Cricket", "4.8"),
@@ -264,7 +264,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                   Text(
                     days[index],
                     style: KhelifyTypography.caption.copyWith(
-                      color: isSelected ? Colors.black : KhelifyColors.textSecondary,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -272,7 +272,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                   Text(
                     dates[index],
                     style: KhelifyTypography.heading3.copyWith(
-                      color: isSelected ? Colors.black : Colors.white,
+                      color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -321,17 +321,17 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                   shape: BoxShape.circle,
                   color: KhelifyColors.inputBackground,
                 ),
-                child: const Icon(Icons.event_available, size: 40, color: KhelifyColors.textSecondary),
+                child: const Icon(Icons.event_available, size: 40, color: Colors.white),
               ),
               const SizedBox(height: 16),
               Text(
                 "No games scheduled",
-                style: KhelifyTypography.bodyLarge.copyWith(color: KhelifyColors.textSecondary),
+                style: KhelifyTypography.bodyLarge.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 8),
               Text(
                 "Check back later for updates",
-                style: KhelifyTypography.bodySmall,
+                style: KhelifyTypography.bodySmall.copyWith(color: Colors.white70),
               ),
             ],
           ),
@@ -346,7 +346,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
       child: Text(
         title,
         style: KhelifyTypography.bodySmall.copyWith(
-          color: KhelifyColors.textSecondary,
+          color: Colors.white70,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
         ),
@@ -354,7 +354,8 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
     );
   }
 
-  Widget _buildGameCard(String title, String subtitle, String time, String sport, {bool isLive = false}) {
+  Widget _buildGameCard(String title, String subtitle, String time, String sport,
+      {bool isLive = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -384,7 +385,14 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
             ),
             child: Center(
               child: isLive
-                  ? const Text("LIVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))
+                  ? const Text(
+                      "LIVE",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    )
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -394,7 +402,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                         ),
                         Text(
                           time.split(' ').length > 1 ? time.split(' ')[1] : '',
-                          style: TextStyle(color: KhelifyColors.textSecondary, fontSize: 10),
+                          style: const TextStyle(color: Colors.white70, fontSize: 10),
                         ),
                       ],
                     ),
@@ -411,7 +419,7 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                     Text(
                       sport.toUpperCase(),
                       style: TextStyle(
-                        color: isLive ? KhelifyColors.persianRed : KhelifyColors.sapphireBlue,
+                        color: isLive ? Colors.white : Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
@@ -419,20 +427,20 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                     ),
                     if (isLive) ...[
                       const SizedBox(width: 6),
-                      Container(width: 4, height: 4, decoration: BoxDecoration(color: KhelifyColors.persianRed, shape: BoxShape.circle)),
+                      Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
                       const SizedBox(width: 6),
-                      Text("IN PROGRESS", style: TextStyle(color: KhelifyColors.textTertiary, fontSize: 10)),
+                      Text("IN PROGRESS", style: TextStyle(color: Colors.white, fontSize: 10)),
                     ]
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(title, style: KhelifyTypography.heading3.copyWith(fontSize: 15)),
+                Text(title, style: KhelifyTypography.heading3.copyWith(fontSize: 15, color: Colors.white)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: KhelifyTypography.bodySmall),
+                Text(subtitle, style: KhelifyTypography.bodySmall.copyWith(color: Colors.white70)),
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: KhelifyColors.textTertiary, size: 20),
+          const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
         ],
       ),
     );
@@ -463,9 +471,9 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: KhelifyTypography.heading3.copyWith(fontSize: 15)),
+                Text(name, style: KhelifyTypography.heading3.copyWith(fontSize: 15, color: Colors.white)),
                 const SizedBox(height: 4),
-                Text(details, style: KhelifyTypography.bodySmall),
+                Text(details, style: KhelifyTypography.bodySmall.copyWith(color: Colors.white70)),
               ],
             ),
           ),
@@ -482,7 +490,10 @@ class _KhojjooScreenState extends State<KhojjooScreen> {
                   children: [
                     const Icon(Icons.star, size: 12, color: KhelifyColors.championGold),
                     const SizedBox(width: 2),
-                    Text(rating, style: TextStyle(color: KhelifyColors.championGold, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text(
+                      rating,
+                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
               ),
