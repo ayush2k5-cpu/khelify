@@ -21,7 +21,9 @@ class KhelifyColors {
 
   static const Color border = Color(0xFFE0E0E0);
   static const Color glassBorder = Color(0x29FFFFFF); // Glassmorphic/translucent borders
-  static const Color inputBackground = Color(0xFFF4F6FA); // <-- Added for cards/fields etc
+  static const Color inputBackground = Color(0xFFF4F6FA); // For cards/fields, etc.
+
+  static const Color darkGrey = Color(0xFF2C2C2E); // <--- Now Defined
 
   static const LinearGradient goldGradient = LinearGradient(
     colors: [Color(0xFFFFD700), Color(0xFFFFB800)],

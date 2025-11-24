@@ -1,15 +1,17 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/record_modal_sheet.dart';
+import 'record_modal_sheet.dart';
+import 'record_screen.dart';
+import '../models/post.dart';
 import '../screens/khojjoo_screen.dart';
 import '../screens/stats_screen.dart';
-import '../screens/record_full_modal.dart'; // import this!
+import '../screens/record_full_modal.dart';
 import '../screens/connect_screen.dart';
+import 'role_selection_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
   const MainAppScreen({super.key});
@@ -20,6 +22,7 @@ class MainAppScreen extends StatefulWidget {
 
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
+  Drill? _selectedDrill;
   bool _isNavBarVisible = true;
   bool _isRecordOverlayVisible = false;
   final ScrollController _scrollController = ScrollController();
@@ -68,15 +71,15 @@ class _MainAppScreenState extends State<MainAppScreen> {
                 index: _currentIndex,
                 children: [
                   HomeScreen(scrollController: _scrollController),
-                  KhojjooScreen(), // SHOW real Khojjoo page here
+                  KhojjooScreen(),
                   _buildRecordScreen(),
                   _buildConnectScreen(),
-                  StatsScreen(), // ← Changed: use real stats UI here!
+                  StatsScreen(),
                 ],
               ),
             ),
 
-            // ========== Overlay Record Section ========== 
+            // ========== Overlay Record Section ==========
             AnimatedPositioned(
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeOut,
@@ -99,10 +102,12 @@ class _MainAppScreenState extends State<MainAppScreen> {
                       children: [
                         Container(
                           height: recordOverlayHeight,
-                          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                            borderRadius:
+                                const BorderRadius.vertical(top: Radius.circular(24)),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
@@ -115,16 +120,15 @@ class _MainAppScreenState extends State<MainAppScreen> {
                             onClose: () => setState(() => _isRecordOverlayVisible = false),
                           ),
                         ),
-                        // Close button (optional: top right)
                         Positioned(
                           right: 16,
                           top: 24,
                           child: IconButton(
                             icon: const Icon(Icons.close_rounded, size: 28),
-                            onPressed: () => setState(() => _isRecordOverlayVisible = false),
+                            onPressed: () =>
+                                setState(() => _isRecordOverlayVisible = false),
                           ),
                         ),
-                        // Drag handle
                         Positioned(
                           top: 10,
                           left: 0,
@@ -195,7 +199,23 @@ class _MainAppScreenState extends State<MainAppScreen> {
   void _onRecordTap() => _onRecordSwipeUp();
 
   void _onRecordSwipeUp() {
-    setState(() => _isRecordOverlayVisible = true);
+    showRecordModal(
+      context,
+      onDrillSelected: (drill) {
+        setState(() { _selectedDrill = drill; });
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordScreen(selectedDrill: drill),
+          ),
+        ).then((_) {
+          setState(() {
+            _selectedDrill = null;
+          });
+        });
+      },
+    );
   }
 
   Widget _buildRecordScreen() {
@@ -276,13 +296,14 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 }
 
-// PulsingButton class unchanged from before!
+// PulsingButton as before
 class _PulsingButton extends StatefulWidget {
   @override
   State<_PulsingButton> createState() => _PulsingButtonState();
 }
 
-class _PulsingButtonState extends State<_PulsingButton> with SingleTickerProviderStateMixin {
+class _PulsingButtonState extends State<_PulsingButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;

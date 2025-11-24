@@ -7,11 +7,7 @@ import '../services/mock_data_service.dart';
 
 class RecordModalSheet extends StatefulWidget {
   final Function(Drill)? onDrillSelected;
-
-  const RecordModalSheet({
-    super.key,
-    this.onDrillSelected,
-  });
+  const RecordModalSheet({super.key, this.onDrillSelected});
 
   @override
   State<RecordModalSheet> createState() => _RecordModalSheetState();
@@ -21,7 +17,6 @@ class _RecordModalSheetState extends State<RecordModalSheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedSportIndex = 0;
-
   late List<Drill> _footballDrills;
   late List<Drill> _badmintonDrills;
 
@@ -159,7 +154,6 @@ class DrillCarousel extends StatefulWidget {
 class _DrillCarouselState extends State<DrillCarousel> {
   late final PageController _pageController;
   int _currentPage = 0;
-
   final Map<String, Color> difficultyColors = {
     'easy': Colors.greenAccent,
     'medium': Colors.orangeAccent,
@@ -280,24 +274,40 @@ class _DrillCarouselState extends State<DrillCarousel> {
           }),
         ),
         const SizedBox(height: 25),
-        ElevatedButton(
-          onPressed: () {
-            widget.onDrillSelected(widget.drills[_currentPage]);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange.shade700,
-            padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30)),
-            shadowColor: Colors.orangeAccent.shade200,
-            elevation: 12,
+        // Vibrant glass START button
+        Container(
+          width: double.infinity,
+          height: 56,
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.75),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orangeAccent.withOpacity(0.15),
+                blurRadius: 16,
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          child: const Text(
-            "Start Recording",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white),
+          child: ElevatedButton(
+            onPressed: () {
+              widget.onDrillSelected(widget.drills[_currentPage]);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Text(
+              'START RECORDING',
+              style: KhelifyTypography.button.copyWith(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
       ],
@@ -305,8 +315,7 @@ class _DrillCarouselState extends State<DrillCarousel> {
   }
 }
 
-// --- Glassmorphic & vibrant DrillCard ---
-
+// Glassmorphic vibrant DrillCard with correct contrast
 class DrillCard extends StatelessWidget {
   final Drill drill;
   final Color difficultyColor;
@@ -319,7 +328,6 @@ class DrillCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Vibrant colored glass glow and border
     final Color glow = difficultyColor;
 
     return Container(
@@ -330,7 +338,7 @@ class DrillCard extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
+              color: Colors.white.withOpacity(0.82),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: glow.withOpacity(0.49), width: 2.2),
               boxShadow: [
@@ -345,7 +353,6 @@ class DrillCard extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 22),
-                // Vibrant avatar
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -377,7 +384,7 @@ class DrillCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 27,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF22222C),
+                    color: Colors.black87,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -416,7 +423,7 @@ class DrillCard extends StatelessWidget {
                   child: Text(
                     drill.description ?? '',
                     style: const TextStyle(
-                        fontSize: 15.5, color: Color(0xFF22232C)),
+                        fontSize: 15.5, color: Colors.black54),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -429,8 +436,6 @@ class DrillCard extends StatelessWidget {
     );
   }
 }
-
-// ------ Color darken extension -----
 
 extension ColorUtils on Color {
   Color darken([double amount = .1]) {
