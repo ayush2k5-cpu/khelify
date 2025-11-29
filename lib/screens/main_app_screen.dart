@@ -102,12 +102,12 @@ class _MainAppScreenState extends State<MainAppScreen> {
                       children: [
                         Container(
                           height: recordOverlayHeight,
-                          margin:
-                              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 0, vertical: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius:
-                                const BorderRadius.vertical(top: Radius.circular(24)),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(24)),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
@@ -117,7 +117,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
                             ],
                           ),
                           child: RecordFullModal(
-                            onClose: () => setState(() => _isRecordOverlayVisible = false),
+                            onClose: () =>
+                                setState(() => _isRecordOverlayVisible = false),
                           ),
                         ),
                         Positioned(
@@ -202,7 +203,9 @@ class _MainAppScreenState extends State<MainAppScreen> {
     showRecordModal(
       context,
       onDrillSelected: (drill) {
-        setState(() { _selectedDrill = drill; });
+        setState(() {
+          _selectedDrill = drill;
+        });
         Navigator.pop(context);
         Navigator.push(
           context,

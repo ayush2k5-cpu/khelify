@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import '../widgets/goal_card.dart';
 import '../widgets/leaderboard_card.dart';
+import '../widgets/performance_graph.dart';
 import '../widgets/streak_tracker.dart';
 import '../widgets/drill_history_card.dart';
 import '../widgets/personal_bests_card.dart';
@@ -35,6 +36,18 @@ class _StatsScreenState extends State<StatsScreen> {
     },
   ];
 
+  // Example mock performance data (use double values)
+  final List<double> weeklyPerformance = [60, 75, 64, 88, 72, 95, 81];
+  final List<String> dayLabels = [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun"
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +67,6 @@ class _StatsScreenState extends State<StatsScreen> {
                 padding: const EdgeInsets.all(22),
                 child: Row(
                   children: [
-                    // Activity Rings (customized)
                     CircularPercentIndicator(
                       radius: 46,
                       lineWidth: 14,
@@ -80,7 +92,6 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                     ),
                     const SizedBox(width: 22),
-                    // Drill, Streak, XP summary
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,8 +101,11 @@ class _StatsScreenState extends State<StatsScreen> {
                           const SizedBox(height: 14),
                           _summaryLine('Streak', '6/7d', Colors.purpleAccent),
                           const SizedBox(height: 14),
-                          _summaryLine('XP', '$currentXP/$xpGoal',
-                              Colors.tealAccent[400]),
+                          _summaryLine(
+                            'XP',
+                            '$currentXP/$xpGoal',
+                            Colors.tealAccent[400],
+                          ),
                         ],
                       ),
                     ),
@@ -99,7 +113,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 ),
               ),
             ),
-            // Weekly XP Goal Card (now functional)
+            // Weekly XP Goal Card
             GoalCard(
               goalName: "Weekly XP Goal",
               progressPercent: currentXP / xpGoal,
@@ -112,6 +126,11 @@ class _StatsScreenState extends State<StatsScreen> {
                   SnackBar(content: Text("Goal set to $newGoal XP!")),
                 );
               },
+            ),
+            // Performance Graph (NEW)
+            PerformanceGraph(
+              data: weeklyPerformance,
+              labels: dayLabels,
             ),
             // Leaderboard
             LeaderboardCard(
@@ -147,7 +166,10 @@ class _StatsScreenState extends State<StatsScreen> {
                     SectionHeader(
                       title: 'Recent Drills',
                       icon: Icons.fitness_center_rounded,
-                      gradient: [Colors.cyanAccent, Colors.blueAccent],
+                      gradient: [
+                        Colors.cyanAccent,
+                        Colors.blueAccent
+                      ], // <-- REQUIRED!
                       active: true,
                     ),
                     const SizedBox(height: 10),
@@ -174,11 +196,22 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _summaryLine(String label, String value, Color? accent) {
     return Row(
       children: [
-        Text(label,
-            style: TextStyle(
-                color: accent, fontWeight: FontWeight.bold, fontSize: 15)),
+        Text(
+          label,
+          style: TextStyle(
+            color: accent,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
         const SizedBox(width: 12),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+          ),
+        ),
       ],
     );
   }
