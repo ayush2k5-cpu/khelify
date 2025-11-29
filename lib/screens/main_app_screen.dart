@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import, unused_field
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,9 +11,7 @@ import 'record_screen.dart';
 import '../models/post.dart';
 import '../screens/khojjoo_screen.dart';
 import '../screens/stats_screen.dart';
-import '../screens/record_full_modal.dart';
 import '../screens/connect_screen.dart';
-import 'role_selection_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
   const MainAppScreen({super.key});
@@ -79,14 +79,14 @@ class _MainAppScreenState extends State<MainAppScreen> {
               ),
             ),
 
-            // ========== Overlay Record Section ==========
+            // ========== (optional) overlay section – currently unused ==========
             AnimatedPositioned(
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeOut,
               left: 0,
               right: 0,
               bottom: _isRecordOverlayVisible ? 0 : -recordOverlayHeight - 32,
-              height: recordOverlayHeight + 32, // for shadow/margin
+              height: recordOverlayHeight + 32,
               child: IgnorePointer(
                 ignoring: !_isRecordOverlayVisible,
                 child: GestureDetector(
@@ -95,59 +95,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
                       setState(() => _isRecordOverlayVisible = false);
                     }
                   },
-                  child: Material(
-                    color: Colors.transparent,
-                    elevation: 0,
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: recordOverlayHeight,
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(24)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 24,
-                                offset: const Offset(0, -8),
-                              ),
-                            ],
-                          ),
-                          child: RecordFullModal(
-                            onClose: () =>
-                                setState(() => _isRecordOverlayVisible = false),
-                          ),
-                        ),
-                        Positioned(
-                          right: 16,
-                          top: 24,
-                          child: IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 28),
-                            onPressed: () =>
-                                setState(() => _isRecordOverlayVisible = false),
-                          ),
-                        ),
-                        Positioned(
-                          top: 10,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Container(
-                              width: 44,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: const SizedBox.shrink(), // overlay disabled for now
                 ),
               ),
             ),
@@ -200,23 +148,29 @@ class _MainAppScreenState extends State<MainAppScreen> {
   void _onRecordTap() => _onRecordSwipeUp();
 
   void _onRecordSwipeUp() {
-    showRecordModal(
-      context,
-      onDrillSelected: (drill) {
-        setState(() {
-          _selectedDrill = drill;
-        });
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RecordScreen(selectedDrill: drill),
-          ),
-        ).then((_) {
-          setState(() {
-            _selectedDrill = null;
-          });
-        });
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return RecordModalSheet(
+          onDrillSelected: (drill) {
+            setState(() {
+              _selectedDrill = drill;
+            });
+            Navigator.pop(context); // close sheet
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RecordScreen(selectedDrill: drill),
+              ),
+            ).then((_) {
+              setState(() {
+                _selectedDrill = null;
+              });
+            });
+          },
+        );
       },
     );
   }
