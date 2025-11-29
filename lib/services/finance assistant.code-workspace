@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../finance assistant"
+		},
+		{
+			"path": "../../../hackathon"
+		},
+		{
+			"path": "../../../Javascript"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}

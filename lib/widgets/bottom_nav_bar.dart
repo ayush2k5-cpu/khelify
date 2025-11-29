@@ -1,102 +1,121 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../themes/khelify_theme.dart';
+import 'package:flutter/material.dart';
 
-// ══════════════════════════════════════════════════════════
-// BOTTOM NAVIGATION BAR
-// 5 Tabs: Home | Khojjoo | Record | Reel | Stats
-// Icons Only (No Labels)
-// ══════════════════════════════════════════════════════════
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final bool isVisible;
+
 
   const BottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+    this.isVisible = true,
+  });
+
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.95),
-        border: Border(
-          top: BorderSide(
-            width: 1,
-            color: KhelifyColors.championGold,
-          ),
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 200),
+      offset: isVisible ? Offset.zero : const Offset(0, 1),
+      curve: Curves.easeInOut,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 16,
         ),
-      ),
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                index: 0,
-                icon: LucideIcons.home,
-                label: 'Home',
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main nav bar with cutout
+            ClipPath(
+              clipper: _NavBarClipper(),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    height: 62,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.15),
+                          Colors.white.withOpacity(0.05),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 25,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildNavItem(0, Icons.home_rounded, 'Home'),
+                          _buildNavItem(1, Icons.explore_rounded, 'Explore'),
+                          const SizedBox(width: 80), // Space for button + cutout
+                          _buildNavItem(3, Icons.people_rounded, 'Connect'),
+                          _buildNavItem(4, Icons.bar_chart_rounded, 'Stats'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              _buildNavItem(
-                index: 1,
-                icon: PhosphorIcons.mapPin(PhosphorIconsStyle.duotone),
-                label: 'Khojjoo',
-              ),
-              _buildNavItem(
-                index: 2,
-                icon: PhosphorIcons.videoCamera(PhosphorIconsStyle.fill),
-                label: 'Record',
-              ),
-              _buildNavItem(
-                index: 3,
-                icon: LucideIcons.playCircle,
-                label: 'Reel',
-              ),
-              _buildNavItem(
-                index: 4,
-                icon: LucideIcons.activity,
-                label: 'Stats',
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required String label,
-  }) {
-    final isActive = currentIndex == index;
 
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () => onTap(index),
       child: Container(
-        width: 60,
-        height: 60,
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isActive 
-                    ? KhelifyColors.sapphireBlue 
-                    : KhelifyColors.textSecondary,
+            Icon(
+              icon,
+              size: 22,
+              color: isSelected
+                  ? const Color(0xFF00B4D8) // CHANGED: bright cyan-blue
+                  : const Color(0xB300B4D8), // CHANGED: 70% opacity
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF00B4D8) // CHANGED: bright cyan-blue
+                    : const Color(0xB300B4D8), // CHANGED: 70% opacity
               ),
             ),
-            // No text labels - icons only!
           ],
         ),
       ),
@@ -104,150 +123,66 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// FLOATING RECORD BUTTON
-// Positioned above bottom nav center
-// Swipe-up gesture to open drill selector
-// ══════════════════════════════════════════════════════════
 
-class FloatingRecordButton extends StatefulWidget {
-  final VoidCallback onTap;
-  final VoidCallback onSwipeUp;
-
-  const FloatingRecordButton({
-    Key? key,
-    required this.onTap,
-    required this.onSwipeUp,
-  }) : super(key: key);
-
+// Custom clipper to create the center cutout
+class _NavBarClipper extends CustomClipper<Path> {
   @override
-  State<FloatingRecordButton> createState() => _FloatingRecordButtonState();
-}
+  Path getClip(Size size) {
+    final path = Path();
+    const cutoutRadius = 38.0; // Radius of the circular cutout
+    final cutoutCenter = size.width / 2; // Center X position
 
-class _FloatingRecordButtonState extends State<FloatingRecordButton> 
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  double _dragDistance = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-  }
+    // Start from top-left
+    path.moveTo(0, 0);
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 55, // Above bottom nav
-      left: MediaQuery.of(context).size.width / 2 - 28, // Center
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onVerticalDragUpdate: (details) {
-          setState(() {
-            _dragDistance += details.delta.dy;
-            if (_dragDistance < -50) {
-              // Swipe up detected
-              widget.onSwipeUp();
-              _dragDistance = 0;
-            }
-          });
-        },
-        onVerticalDragEnd: (details) {
-          setState(() {
-            _dragDistance = 0;
-          });
-        },
-        child: AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            return Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: KhelifyColors.blueGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: KhelifyColors.championGold.withOpacity(
-                      0.3 + (_pulseController.value * 0.3),
-                    ),
-                    blurRadius: 20 + (_pulseController.value * 15),
-                    spreadRadius: 5 + (_pulseController.value * 5),
-                  ),
-                  BoxShadow(
-                    color: KhelifyColors.sapphireBlue.withOpacity(0.5),
-                    blurRadius: 15,
-                    spreadRadius: 3,
-                  ),
-                ],
-              ),
-              child: Icon(
-                PhosphorIcons.videoCamera(PhosphorIconsStyle.fill),
-                color: Colors.white,
-                size: 28,
-              ),
-            );
-          },
-        ),
-      ),
+    // Top edge until the cutout
+    path.lineTo(cutoutCenter - cutoutRadius - 10, 0);
+
+
+    // Create the curved cutout (semicircle notch)
+    path.quadraticBezierTo(
+      cutoutCenter - cutoutRadius,
+      0,
+      cutoutCenter - cutoutRadius,
+      10,
     );
+    
+    path.arcToPoint(
+      Offset(cutoutCenter + cutoutRadius, 10),
+      radius: const Radius.circular(cutoutRadius),
+      clockwise: false,
+    );
+    
+    path.quadraticBezierTo(
+      cutoutCenter + cutoutRadius,
+      0,
+      cutoutCenter + cutoutRadius + 10,
+      0,
+    );
+
+
+    // Complete the top edge
+    path.lineTo(size.width, 0);
+
+
+    // Right edge
+    path.lineTo(size.width, size.height);
+
+
+    // Bottom edge
+    path.lineTo(0, size.height);
+
+
+    // Close the path
+    path.close();
+
+
+    return path;
   }
-}
 
-// ══════════════════════════════════════════════════════════
-// NAV WRAPPER WITH FLOATING BUTTON
-// Use this in your main screen
-// ══════════════════════════════════════════════════════════
-
-class NavWrapper extends StatelessWidget {
-  final Widget child;
-  final int currentIndex;
-  final Function(int) onNavTap;
-  final VoidCallback onRecordTap;
-  final VoidCallback onRecordSwipeUp;
-
-  const NavWrapper({
-    Key? key,
-    required this.child,
-    required this.currentIndex,
-    required this.onNavTap,
-    required this.onRecordTap,
-    required this.onRecordSwipeUp,
-  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Main content
-        child,
-        
-        // Floating Record Button
-        FloatingRecordButton(
-          onTap: onRecordTap,
-          onSwipeUp: onRecordSwipeUp,
-        ),
-        
-        // Bottom Nav Bar
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: BottomNavBar(
-            currentIndex: currentIndex,
-            onTap: onNavTap,
-          ),
-        ),
-      ],
-    );
-  }
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

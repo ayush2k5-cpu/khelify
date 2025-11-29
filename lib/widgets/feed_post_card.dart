@@ -1,171 +1,479 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../models/post.dart';
 
-class KhelifyFeedCard extends StatelessWidget {
-  const KhelifyFeedCard({super.key});
+class FeedPostCard extends StatelessWidget {
+  final Post post;
+  final int index;
+
+  const FeedPostCard({super.key, required this.post, this.index = 0});
+
+  Map<String, dynamic> _getColorScheme() {
+    final schemes = [
+      {
+        'gradient': [const Color(0xFFBB330E), const Color(0xFFDD7631)],
+        'accent': const Color(0xFFBB330E),
+        'stats': const Color(0xFFDD7631),
+      },
+      {
+        'gradient': [const Color(0xFFDD7631), const Color(0xFF708160)],
+        'accent': const Color(0xFFDD7631),
+        'stats': const Color(0xFF708160),
+      },
+      {
+        'gradient': [const Color(0xFF708160), const Color(0xFFD9CF93)],
+        'accent': const Color(0xFF708160),
+        'stats': const Color(0xFFDD7631),
+      },
+      {
+        'gradient': [const Color(0xFFD9CF93), const Color(0xFFBB330E)],
+        'accent': const Color(0xFFD9CF93),
+        'stats': const Color(0xFFBB330E),
+      },
+    ];
+    return schemes[index % schemes.length];
+  }
+
+  String _getInitials(String name) {
+    final parts = name.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  String _getTimeAgo(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+    } else {
+      return 'Just now';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = _getColorScheme();
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 18, vertical: 17),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFa27f53), Color(0xFF927252)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.23),
-          width: 1.7,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.13),
-            blurRadius: 22,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 22,
-                  backgroundColor: Colors.white24,
-                  child: Icon(Icons.person, color: Colors.white, size: 28),
-                ),
-                SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text("Sarah Johnson",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.5)),
-                          SizedBox(width: 5),
-                          Icon(Icons.verified, color: Colors.blue, size: 17),
-                        ],
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        "Elite Athlete • 2h",
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.77),
-                            fontSize: 12.2,
-                            fontWeight: FontWeight.w500),
-                      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colors['gradient'][0].withOpacity(0.1),
+                      colors['gradient'][1].withOpacity(0.05),
                     ],
                   ),
-                ),
-                Icon(Icons.more_vert, color: Colors.white.withOpacity(0.62)),
-              ],
-            ),
-            SizedBox(height: 17),
-            // Main content
-            Text(
-              "Crushed my 40m sprint today! 🔥\nNew PR: 5.9s (-0.4s improvement)\nFeeling unstoppable! 💪",
-              style: TextStyle(
-                fontSize: 15.5,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                height: 1.34,
-              ),
-            ),
-            SizedBox(height: 15),
-            // Media
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    "https://images.unsplash.com/photo-1464983953574-0892a716854b?fit=crop&w=600&q=80",
-                    height: 185,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: colors['accent'].withOpacity(0.2),
+                    width: 1.5,
                   ),
                 ),
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 26,
-                  child: Icon(Icons.play_arrow, color: Colors.blue, size: 34),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: colors['gradient'],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors['accent'].withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                _getInitials(post.userName),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        post.userName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                          color: Color(0xFF1A1A1A),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (post.isVerified) ...[
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.verified,
+                                        size: 16,
+                                        color: colors['accent'],
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _getTimeAgo(post.timestamp),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: colors['accent'].withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: colors['accent'].withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.more_horiz,
+                                  color: colors['accent'],
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Caption
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: Text(
+                        post.content,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.4,
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Image/Video Section
+                    if (post.mediaType == 'video' || post.mediaType == 'image')
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+                              child: Container(
+                                height: 380,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFFE0E0E0),
+                                      const Color(0xFFF5F5F5),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    post.mediaType == 'video'
+                                        ? Icons.play_circle_outline
+                                        : Icons.image,
+                                    size: 70,
+                                    color: const Color(0xFFBDBDBD),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Sport badge
+                            Positioned(
+                              top: 12,
+                              left: 12,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.black.withOpacity(0.6),
+                                          Colors.black.withOpacity(0.4),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(post.drillIcon ?? '🏃',
+                                            style: const TextStyle(fontSize: 14)),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          post.drillName ?? 'Activity',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    // Actions
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Row(
+                        children: [
+                          _buildGlassAction(
+                              Icons.favorite, post.likes.toString(), colors['accent']),
+                          const SizedBox(width: 20),
+                          _buildGlassAction(Icons.chat_bubble, post.comments.toString(),
+                              const Color(0xFF6B7280)),
+                          const SizedBox(width: 20),
+                          _buildGlassAction(Icons.repeat_rounded, post.shares.toString(),
+                              const Color(0xFF6B7280)),
+                          const Spacer(),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: colors['accent'].withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: colors['accent'].withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.bookmark,
+                                  size: 20,
+                                  color: colors['accent'],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  bottom: 10,
-                  right: 15,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.54),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      "0:15",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12),
-                    ),
-                  ),
+              ),
+            ),
+          ),
+          // Stats Section (modify as needed)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF181B21),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6366F1).withOpacity(0.05),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            SizedBox(height: 13),
-            // Badge
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-              decoration: BoxDecoration(
-                color: Color(0xffffd700).withOpacity(0.11),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Color(0xffffd700), width: 1.2),
-              ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 24),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Icon(Icons.flash_on, color: Color(0xffffd700), size: 17),
-                  SizedBox(width: 7),
-                  Text("40m Sprint", style: TextStyle(color: Color(0xffffd700), fontSize: 14.1, fontWeight: FontWeight.bold)),
-                  SizedBox(width: 8),
-                  Text("•", style: TextStyle(color: Color(0xffffd700))),
-                  SizedBox(width: 8),
-                  Text("87", style: TextStyle(color: Color(0xffffd700))),
-                  SizedBox(width: 8),
-                  Text("•", style: TextStyle(color: Color(0xffffd700))),
-                  SizedBox(width: 8),
-                  Text("ELITE", style: TextStyle(color: Color(0xffffd700))),
+                  _StatColumn(
+                    label: "Score",
+                    value: post.score.toString(),
+                    unit: "",
+                    icon: Icons.star,
+                    gradient: const [Color(0xFFEC4899), Color(0xFF6366F1)],
+                  ),
+                  _StatColumn(
+                    label: "Tier",
+                    value: post.tier.substring(0, 3),
+                    unit: "",
+                    icon: Icons.emoji_events,
+                    gradient: const [Color(0xFFFFD700), Color(0xFFFF8C00)],
+                  ),
+                  _StatColumn(
+                    label: "Likes",
+                    value: post.likes.toString(),
+                    unit: "",
+                    icon: Icons.favorite,
+                    gradient: const [Color(0xFFFF6B6B), Color(0xFFFF4757)],
+                  ),
+                  _StatColumn(
+                    label: "Comments",
+                    value: post.comments.toString(),
+                    unit: "",
+                    icon: Icons.chat_bubble,
+                    gradient: const [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 10),
-            // Actions
-            Row(
-              children: [
-                Icon(Icons.favorite_border, color: Colors.white.withOpacity(0.83), size: 22),
-                SizedBox(width: 4),
-                Text("124", style: TextStyle(color: Colors.white70, fontSize: 15)),
-                SizedBox(width: 28),
-                Icon(Icons.mode_comment_outlined, color: Colors.white.withOpacity(0.73), size: 21),
-                SizedBox(width: 4),
-                Text("18", style: TextStyle(color: Colors.white60, fontSize: 15)),
-                SizedBox(width: 28),
-                Icon(Icons.sync, color: Colors.white.withOpacity(0.68), size: 20),
-                SizedBox(width: 4),
-                Text("7", style: TextStyle(color: Colors.white54, fontSize: 15)),
-              ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlassAction(IconData icon, String count, Color color) {
+    return Row(
+      children: [
+        Icon(icon, size: 22, color: color),
+        const SizedBox(width: 6),
+        Text(
+          count,
+          style: TextStyle(
+            fontSize: 14,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatColumn extends StatelessWidget {
+  final String label, value, unit;
+  final IconData icon;
+  final List<Color> gradient;
+  const _StatColumn({
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.icon,
+    required this.gradient,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: gradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: gradient.first.withOpacity(0.32),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                letterSpacing: -0.3,
+              ),
+            ),
+            if (unit.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2, left: 3),
+                child: Text(
+                  unit,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
           ],
         ),
-      ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFFCBD5E1),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

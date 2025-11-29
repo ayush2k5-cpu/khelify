@@ -1,20 +1,20 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../themes/khelify_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../screens/home_screen.dart';
-import '../screens/record_modal_sheet.dart';
-
-// ══════════════════════════════════════════════════════════
-// MAIN APP SCREEN
-// Tab navigation + Floating Record Button
-// Home | Khojjoo | Record | Reel | Stats
-// ══════════════════════════════════════════════════════════
+import 'record_modal_sheet.dart';
+import 'record_screen.dart';
+import '../models/post.dart';
+import '../screens/khojjoo_screen.dart';
+import '../screens/stats_screen.dart';
+import '../screens/record_full_modal.dart';
+import '../screens/connect_screen.dart';
+import 'role_selection_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
-  const MainAppScreen({Key? key}) : super(key: key);
+  const MainAppScreen({super.key});
 
   @override
   State<MainAppScreen> createState() => _MainAppScreenState();
@@ -22,572 +22,201 @@ class MainAppScreen extends StatefulWidget {
 
 class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
-  int _khojjooTabIndex = 0; // 0 = Map, 1 = Games Schedule
-  int _selectedScheduleDateIndex = 0; // 0 = Today, 1 = Tomorrow, etc.
-  
-  final Completer<GoogleMapController> _mapController = Completer();
+  Drill? _selectedDrill;
+  bool _isNavBarVisible = true;
+  bool _isRecordOverlayVisible = false;
+  final ScrollController _scrollController = ScrollController();
+  double _lastScrollPosition = 0;
 
-  static final CameraPosition _kInitialCamera = CameraPosition(
-    target: LatLng(20.5937, 78.9629), // Center of India
-    zoom: 5.5,
-  );
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
-  final Set<Marker> _kMarkers = {
-    Marker(
-      markerId: MarkerId('delhi_academy'),
-      position: LatLng(28.6139, 77.2090),
-      infoWindow: InfoWindow(title: 'Delhi Sports Academy'),
-    ),
-    Marker(
-      markerId: MarkerId('mumbai_academy'),
-      position: LatLng(19.0760, 72.8777),
-      infoWindow: InfoWindow(title: 'Mumbai Training Centre'),
-    ),
-  };
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final currentScroll = _scrollController.position.pixels;
+    final scrollDelta = currentScroll - _lastScrollPosition;
+
+    if (scrollDelta > 5 && _isNavBarVisible) {
+      setState(() => _isNavBarVisible = false);
+    } else if (scrollDelta < -5 && !_isNavBarVisible) {
+      setState(() => _isNavBarVisible = true);
+    }
+    if (currentScroll <= 0 && !_isNavBarVisible) {
+      setState(() => _isNavBarVisible = true);
+    }
+    _lastScrollPosition = currentScroll;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final recordOverlayHeight = MediaQuery.of(context).size.height * 0.85;
+
     return Scaffold(
-      backgroundColor: KhelifyColors.scaffoldBackground,
-      body: Stack(
-        children: [
-          // Main Content (Tab Views)
-          IndexedStack(
-            index: _currentIndex,
-            children: [
-              HomeScreen(), // Tab 0
-              _buildKhojjooScreen(), // Tab 1
-              _buildRecordScreen(), // Tab 2 (handled by floating button)
-              _buildReelScreen(), // Tab 3
-              _buildStatsScreen(), // Tab 4
-            ],
-          ),
-
-          // Floating Record Button
-          Positioned(
-            bottom: 55,
-            left: MediaQuery.of(context).size.width / 2 - 28,
-            child: _buildFloatingRecordButton(),
-          ),
-
-          // Bottom Navigation Bar
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: BottomNavBar(
-              currentIndex: _currentIndex,
-              onTap: _onNavTap,
+      backgroundColor: const Color.fromARGB(255, 135, 98, 98),
+      body: Container(
+        color: Colors.white,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  HomeScreen(scrollController: _scrollController),
+                  KhojjooScreen(),
+                  _buildRecordScreen(),
+                  _buildConnectScreen(),
+                  StatsScreen(),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // ========== Overlay Record Section ==========
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOut,
+              left: 0,
+              right: 0,
+              bottom: _isRecordOverlayVisible ? 0 : -recordOverlayHeight - 32,
+              height: recordOverlayHeight + 32, // for shadow/margin
+              child: IgnorePointer(
+                ignoring: !_isRecordOverlayVisible,
+                child: GestureDetector(
+                  onVerticalDragUpdate: (details) {
+                    if (details.delta.dy > 8) {
+                      setState(() => _isRecordOverlayVisible = false);
+                    }
+                  },
+                  child: Material(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: recordOverlayHeight,
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                const BorderRadius.vertical(top: Radius.circular(24)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 24,
+                                offset: const Offset(0, -8),
+                              ),
+                            ],
+                          ),
+                          child: RecordFullModal(
+                            onClose: () => setState(() => _isRecordOverlayVisible = false),
+                          ),
+                        ),
+                        Positioned(
+                          right: 16,
+                          top: 24,
+                          child: IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 28),
+                            onPressed: () =>
+                                setState(() => _isRecordOverlayVisible = false),
+                          ),
+                        ),
+                        Positioned(
+                          top: 10,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              width: 44,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Floating record button
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 200),
+              bottom: _isNavBarVisible ? 30 : 15,
+              left: MediaQuery.of(context).size.width / 2 - 30,
+              child: _buildFloatingRecordButton(),
+            ),
+
+            // Bottom nav bar with auto-hide
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: BottomNavBar(
+                currentIndex: _currentIndex,
+                onTap: _onNavTap,
+                isVisible: _isNavBarVisible,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  // ========== FLOATING RECORD BUTTON ==========
 
   Widget _buildFloatingRecordButton() {
     return GestureDetector(
       onTap: _onRecordTap,
       onVerticalDragUpdate: (details) {
-        if (details.delta.dy < -5) {
-          _onRecordSwipeUp();
-        }
+        if (details.delta.dy < -5) _onRecordSwipeUp();
       },
       child: _PulsingButton(),
     );
   }
 
-  // ========== NAV HANDLING ==========
-
   void _onNavTap(int index) {
-    if (index == 2) {
-      // Record tab - show modal instead
-      _onRecordSwipeUp();
-    } else {
-      setState(() {
-        _currentIndex = index;
-      });
+    if (_isRecordOverlayVisible) {
+      setState(() => _isRecordOverlayVisible = false);
     }
+    setState(() {
+      _currentIndex = index;
+      _isNavBarVisible = true;
+    });
   }
 
-  void _onRecordTap() {
-    _onRecordSwipeUp();
-  }
+  void _onRecordTap() => _onRecordSwipeUp();
 
   void _onRecordSwipeUp() {
     showRecordModal(
       context,
       onDrillSelected: (drill) {
-        print('Selected drill: ${drill.name}');
-        // TODO: Navigate to camera screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Starting ${drill.name}... 🔥'),
-            backgroundColor: KhelifyColors.championGold,
-            behavior: SnackBarBehavior.floating,
+        setState(() { _selectedDrill = drill; });
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordScreen(selectedDrill: drill),
           ),
-        );
+        ).then((_) {
+          setState(() {
+            _selectedDrill = null;
+          });
+        });
       },
     );
   }
-
-  // ========== KHOJJOO (MAP/SCHEDULE) SCREEN ==========
-
-  Widget _buildKhojjooScreen() {
-    return Stack(
-      children: [
-        // Content Layer (Map or Schedule)
-        IndexedStack(
-          index: _khojjooTabIndex,
-          children: [
-            _buildKhojjooMapView(),       // Index 0
-            _buildGamesScheduleView(),    // Index 1
-          ],
-        ),
-
-        // Top Tabs Layer (Floating Header)
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            child: _buildKhojjooTopTabs(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 1. Top Tab Bar
-  Widget _buildKhojjooTopTabs() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: KhelifyColors.glassBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildTabItem(0, "Khojjoo"),
-          Container(width: 1, color: KhelifyColors.glassBorder), // Divider
-          _buildTabItem(1, "Games Schedule"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem(int index, String title) {
-    final isSelected = _khojjooTabIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _khojjooTabIndex = index),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? KhelifyColors.glassBorder : Colors.transparent,
-            borderRadius: index == 0 
-                ? BorderRadius.horizontal(left: Radius.circular(11))
-                : BorderRadius.horizontal(right: Radius.circular(11)),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            title,
-            style: isSelected 
-                ? KhelifyTypography.button.copyWith(color: KhelifyColors.championGold)
-                : KhelifyTypography.bodyMedium.copyWith(color: KhelifyColors.textSecondary),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 2. Map View (with Draggable Sheet)
-  Widget _buildKhojjooMapView() {
-    return Stack(
-      children: [
-        // Map Background
-        Positioned.fill(
-          child: GoogleMap(
-            mapType: MapType.normal,
-            initialCameraPosition: _kInitialCamera,
-            markers: _kMarkers,
-            myLocationEnabled: false,
-            compassEnabled: false,
-            zoomControlsEnabled: false,
-            onMapCreated: (GoogleMapController controller) {
-              if (!_mapController.isCompleted) {
-                _mapController.complete(controller);
-              }
-            },
-            padding: EdgeInsets.only(top: 100), // Add padding so Google Logo isn't hidden by tabs
-          ),
-        ),
-
-        // Draggable Bottom Sheet
-        DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.15,
-          maxChildSize: 0.85,
-          builder: (BuildContext context, ScrollController scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: KhelifyColors.cardDark,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 20,
-                    offset: Offset(0, -5),
-                  ),
-                ],
-                border: Border(
-                  top: BorderSide(color: KhelifyColors.glassBorder, width: 1),
-                ),
-              ),
-              child: ListView(
-                controller: scrollController,
-                padding: EdgeInsets.zero,
-                children: [
-                  // Drag Handle
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: KhelifyColors.textTertiary.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-
-                  // Content
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Nearby Academies",
-                          style: KhelifyTypography.heading2,
-                        ),
-                        SizedBox(height: 16),
-                        _buildAcademyItem("Delhi Sports Academy", "4.5 km • Cricket", "4.8"),
-                        _buildAcademyItem("Mumbai Training Centre", "12 km • Football", "4.6"),
-                        _buildAcademyItem("Bangalore Elite Club", "8.2 km • Badminton", "4.9"),
-                        _buildAcademyItem("Pune Smashers", "3.1 km • Tennis", "4.5"),
-                        _buildAcademyItem("Hyderabad Hoopsters", "5.5 km • Basketball", "4.7"),
-                        SizedBox(height: 100), 
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // 3. Games Schedule View
-  Widget _buildGamesScheduleView() {
-    return Container(
-      padding: EdgeInsets.only(top: 80), // Top tabs height + padding
-      child: Column(
-        children: [
-          // Horizontal Date Strip
-          _buildCalendarStrip(),
-          
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(16),
-              children: _getGamesForSelectedDate(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarStrip() {
-    final days = ['THU', 'FRI', 'SAT', 'SUN', 'MON', 'TUE', 'WED'];
-    final dates = ['15', '16', '17', '18', '19', '20', '21'];
-    
-    return Container(
-      height: 80,
-      margin: EdgeInsets.only(bottom: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 7,
-        itemBuilder: (context, index) {
-          final isSelected = _selectedScheduleDateIndex == index;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedScheduleDateIndex = index),
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              width: 60,
-              margin: EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? KhelifyColors.championGold : KhelifyColors.cardDark,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected ? KhelifyColors.championGold : KhelifyColors.border,
-                  width: 1,
-                ),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: KhelifyColors.championGold.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  )
-                ] : [],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    days[index],
-                    style: KhelifyTypography.caption.copyWith(
-                      color: isSelected ? Colors.black : KhelifyColors.textSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    dates[index],
-                    style: KhelifyTypography.heading3.copyWith(
-                      color: isSelected ? Colors.black : Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  List<Widget> _getGamesForSelectedDate() {
-    // Mock Data based on date
-    if (_selectedScheduleDateIndex == 0) {
-      // Today
-      return [
-        _buildSectionHeader("LIVE NOW 🔥"),
-        _buildGameCard("Premier League", "Delhi Dynamos vs Mumbai", "LIVE", "Football", isLive: true),
-        SizedBox(height: 24),
-        _buildSectionHeader("UPCOMING TODAY"),
-        _buildGameCard("U-19 Selection", "Rohini Complex • Court 1", "04:00 PM", "Cricket"),
-        _buildGameCard("Badminton Singles", "Quarter Finals • Arena 2", "06:30 PM", "Badminton"),
-        SizedBox(height: 100),
-      ];
-    } else if (_selectedScheduleDateIndex == 1) {
-      // Tomorrow
-      return [
-        _buildSectionHeader("TOMORROW"),
-        _buildGameCard("Inter-School League", "St. Marks vs DPS", "09:00 AM", "Basketball"),
-        _buildGameCard("Tennis Open", "Semi-Finals • Clay Court", "02:00 PM", "Tennis"),
-        _buildGameCard("Practice Match", "Academy A vs Academy B", "05:00 PM", "Football"),
-        SizedBox(height: 100),
-      ];
-    } else {
-      // Other dates (Empty state)
-      return [
-        SizedBox(height: 60),
-        Center(
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: KhelifyColors.inputBackground,
-                ),
-                child: Icon(Icons.event_available, size: 40, color: KhelifyColors.textSecondary),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "No games scheduled",
-                style: KhelifyTypography.bodyLarge.copyWith(color: KhelifyColors.textSecondary),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Check back later for updates",
-                style: KhelifyTypography.bodySmall,
-              ),
-            ],
-          ),
-        ),
-      ];
-    }
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12, left: 4),
-      child: Text(
-        title,
-        style: KhelifyTypography.bodySmall.copyWith(
-          color: KhelifyColors.textSecondary,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGameCard(String title, String subtitle, String time, String sport, {bool isLive = false}) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: KhelifyColors.cardDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isLive ? KhelifyColors.persianRed.withOpacity(0.5) : KhelifyColors.border
-        ),
-        boxShadow: isLive ? [
-          BoxShadow(
-            color: KhelifyColors.persianRed.withOpacity(0.1),
-            blurRadius: 12,
-          )
-        ] : [],
-      ),
-      child: Row(
-        children: [
-          // Time Box
-          Container(
-            width: 55,
-            height: 55,
-            decoration: BoxDecoration(
-              color: isLive ? KhelifyColors.persianRed : KhelifyColors.inputBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: isLive 
-                  ? Text("LIVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          time.split(' ')[0],
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          time.split(' ')[1],
-                          style: TextStyle(color: KhelifyColors.textSecondary, fontSize: 10),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-          SizedBox(width: 16),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      sport.toUpperCase(),
-                      style: TextStyle(
-                        color: isLive ? KhelifyColors.persianRed : KhelifyColors.sapphireBlue,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    if (isLive) ...[
-                      SizedBox(width: 6),
-                      Container(width: 4, height: 4, decoration: BoxDecoration(color: KhelifyColors.persianRed, shape: BoxShape.circle)),
-                      SizedBox(width: 6),
-                      Text("IN PROGRESS", style: TextStyle(color: KhelifyColors.textTertiary, fontSize: 10)),
-                    ]
-                  ],
-                ),
-                SizedBox(height: 4),
-                Text(title, style: KhelifyTypography.heading3.copyWith(fontSize: 15)),
-                SizedBox(height: 2),
-                Text(subtitle, style: KhelifyTypography.bodySmall),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: KhelifyColors.textTertiary, size: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAcademyItem(String name, String details, String rating) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: KhelifyColors.inputBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: KhelifyColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: KhelifyColors.blueGradient,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.sports_score, color: Colors.white, size: 24),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: KhelifyTypography.heading3.copyWith(fontSize: 15)),
-                SizedBox(height: 4),
-                Text(details, style: KhelifyTypography.bodySmall),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: KhelifyColors.championGold.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.star, size: 12, color: KhelifyColors.championGold),
-                    SizedBox(width: 2),
-                    Text(rating, style: TextStyle(color: KhelifyColors.championGold, fontSize: 12, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ========== PLACEHOLDER SCREENS ==========
 
   Widget _buildRecordScreen() {
     return _buildPlaceholder(
@@ -598,23 +227,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
     );
   }
 
-  Widget _buildReelScreen() {
-    return _buildPlaceholder(
-      icon: '📱',
-      title: 'REELS',
-      subtitle: 'Vertical video feed',
-      description: 'Swipe through athlete performances in TikTok-style format.',
-    );
-  }
-
-  Widget _buildStatsScreen() {
-    return _buildPlaceholder(
-      icon: '📊',
-      title: 'STATS',
-      subtitle: 'Your performance dashboard',
-      description:
-          'Track your progress with Apple Fitness-style rings and Whoop-inspired metrics.',
-    );
+  Widget _buildConnectScreen() {
+    return const ConnectScreen();
   }
 
   Widget _buildPlaceholder({
@@ -625,15 +239,12 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              icon,
-              style: TextStyle(fontSize: 80),
-            ),
-            SizedBox(height: 24),
+            Text(icon, style: const TextStyle(fontSize: 80)),
+            const SizedBox(height: 24),
             ShaderMask(
               shaderCallback: (bounds) {
                 return KhelifyColors.goldGradient.createShader(bounds);
@@ -641,18 +252,18 @@ class _MainAppScreenState extends State<MainAppScreen> {
               child: Text(
                 title,
                 style: KhelifyTypography.displayLarge.copyWith(
-                  color: Colors.white,
+                  color: KhelifyColors.textPrimary,
                 ),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               subtitle,
               style: KhelifyTypography.bodyLarge.copyWith(
                 color: KhelifyColors.textSecondary,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               description,
               style: KhelifyTypography.bodyMedium.copyWith(
@@ -660,11 +271,11 @@ class _MainAppScreenState extends State<MainAppScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: KhelifyColors.cardDark,
+                color: KhelifyColors.cardLight,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: KhelifyColors.championGold,
@@ -685,10 +296,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// PULSING BUTTON ANIMATION
-// ══════════════════════════════════════════════════════════
-
+// PulsingButton as before
 class _PulsingButton extends StatefulWidget {
   @override
   State<_PulsingButton> createState() => _PulsingButtonState();
@@ -698,16 +306,20 @@ class _PulsingButtonState extends State<_PulsingButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _glowAnimation = Tween<double>(begin: 18, end: 40).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -721,33 +333,42 @@ class _PulsingButtonState extends State<_PulsingButton>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _scaleAnimation,
+      animation: _controller,
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
           child: Container(
-            width: 56,
-            height: 56,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: KhelifyColors.blueGradient,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF6B35), Color(0xFFFF4500)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: KhelifyColors.championGold.withOpacity(0.4),
-                  blurRadius: 30,
-                  spreadRadius: 5,
+                  color: const Color(0xFFFF6B35).withOpacity(0.7),
+                  blurRadius: _glowAnimation.value,
+                  spreadRadius: _glowAnimation.value / 3,
                 ),
                 BoxShadow(
-                  color: KhelifyColors.sapphireBlue.withOpacity(0.6),
-                  blurRadius: 20,
-                  spreadRadius: 3,
+                  color: const Color(0xFFFF4500).withOpacity(0.4),
+                  blurRadius: _glowAnimation.value * 0.8,
+                  spreadRadius: _glowAnimation.value / 4,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 25,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.videocam_rounded,
               color: Colors.white,
-              size: 28,
+              size: 30,
             ),
           ),
         );
