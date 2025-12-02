@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: '^3.5.0'
 
 dependencies:
   flutter:
@@ -38,6 +38,9 @@ dependencies:
   modal_bottom_sheet: ^3.0.0
   percent_indicator: ^4.2.2
   fl_chart: ^0.63.0
+
+  # ML Kit Pose Detection
+  google_mlkit_pose_detection: ^0.14.0
 
 dev_dependencies:
   flutter_test:

@@ -12,6 +12,7 @@ import '../models/post.dart';
 import '../screens/khojjoo_screen.dart';
 import '../screens/stats_screen.dart';
 import '../screens/connect_screen.dart';
+import '../pose_debug_screen.dart'; // NEW: pose debug screen
 
 class MainAppScreen extends StatefulWidget {
   const MainAppScreen({super.key});
@@ -70,11 +71,33 @@ class _MainAppScreenState extends State<MainAppScreen> {
               child: IndexedStack(
                 index: _currentIndex,
                 children: [
-                  HomeScreen(scrollController: _scrollController),
-                  KhojjooScreen(),
+                  // Wrap HomeScreen so we can overlay a small debug FAB
+                  Stack(
+                    children: [
+                      HomeScreen(scrollController: _scrollController),
+                      Positioned(
+                        right: 16,
+                        top: 40,
+                        child: FloatingActionButton.small(
+                          heroTag: 'poseDebugFab',
+                          backgroundColor: Colors.black87,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const PoseDebugScreen(),
+                              ),
+                            );
+                          },
+                          child: const Icon(Icons.accessibility_new_rounded),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const KhojjooScreen(),
                   _buildRecordScreen(),
                   _buildConnectScreen(),
-                  StatsScreen(),
+                  const StatsScreen(),
                 ],
               ),
             ),
