@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -27,15 +27,12 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
   }
 
   Future<void> _init() async {
-    // 1. Get available cameras
     final cameras = await availableCameras();
-    // Prefer back camera
     _cameraDescription = cameras.firstWhere(
       (c) => c.lensDirection == CameraLensDirection.back,
       orElse: () => cameras.first,
     );
 
-    // 2. Init camera controller
     _cameraController = CameraController(
       _cameraDescription!,
       ResolutionPreset.medium,
@@ -45,7 +42,6 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
     await _cameraController!.initialize();
     await _cameraController!.startImageStream(_processCameraImage);
 
-    // 3. Init ML Kit pose detector
     final options = PoseDetectorOptions(
       mode: PoseDetectionMode.stream,
     );
@@ -57,7 +53,7 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
-    if (_isBusy || !mounted) return;
+    if (_isBusy || !mounted || _cameraDescription == null) return;
     _isBusy = true;
 
     try {
@@ -67,9 +63,12 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
       if (!mounted) return;
       setState(() {
         _poses = poses;
+        // Temporary debug
+        // ignore: avoid_print
+        print('Detected poses: ${poses.length}');
       });
     } catch (_) {
-      // swallow for now – this is just a debug screen
+      // ignore errors in debug screen
     } finally {
       _isBusy = false;
     }
@@ -187,15 +186,15 @@ class _PosePainter extends CustomPainter {
     for (final pose in poses) {
       final landmarks = pose.landmarks;
 
-      Offset? _p(PoseLandmarkType type) {
+      Offset? pointFor(PoseLandmarkType type) {
         final landmark = landmarks[type];
         if (landmark == null) return null;
+
         final x = landmark.x;
         final y = landmark.y;
 
-        // Convert from image space to widget space
-        double scaleX = size.width / absoluteImageSize.width;
-        double scaleY = size.height / absoluteImageSize.height;
+        final scaleX = size.width / absoluteImageSize.width;
+        final scaleY = size.height / absoluteImageSize.height;
 
         double mappedX = x * scaleX;
         double mappedY = y * scaleY;
@@ -208,33 +207,35 @@ class _PosePainter extends CustomPainter {
       }
 
       void drawBone(PoseLandmarkType a, PoseLandmarkType b) {
-        final p1 = _p(a);
-        final p2 = _p(b);
+        final p1 = pointFor(a);
+        final p2 = pointFor(b);
         if (p1 == null || p2 == null) return;
         canvas.drawLine(p1, p2, bonePaint);
       }
 
-      // Draw main bones
+      // Torso
       drawBone(PoseLandmarkType.leftShoulder, PoseLandmarkType.rightShoulder);
       drawBone(PoseLandmarkType.leftHip, PoseLandmarkType.rightHip);
 
+      // Arms
       drawBone(PoseLandmarkType.leftShoulder, PoseLandmarkType.leftElbow);
       drawBone(PoseLandmarkType.leftElbow, PoseLandmarkType.leftWrist);
       drawBone(PoseLandmarkType.rightShoulder, PoseLandmarkType.rightElbow);
       drawBone(PoseLandmarkType.rightElbow, PoseLandmarkType.rightWrist);
 
+      // Legs
       drawBone(PoseLandmarkType.leftHip, PoseLandmarkType.leftKnee);
       drawBone(PoseLandmarkType.leftKnee, PoseLandmarkType.leftAnkle);
       drawBone(PoseLandmarkType.rightHip, PoseLandmarkType.rightKnee);
       drawBone(PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle);
 
-      // Draw joints
+      // Joints
       for (final landmark in landmarks.values) {
         final x = landmark.x;
         final y = landmark.y;
 
-        double scaleX = size.width / absoluteImageSize.width;
-        double scaleY = size.height / absoluteImageSize.height;
+        final scaleX = size.width / absoluteImageSize.width;
+        final scaleY = size.height / absoluteImageSize.height;
 
         double mappedX = x * scaleX;
         double mappedY = y * scaleY;

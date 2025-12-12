@@ -62,7 +62,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
     final recordOverlayHeight = MediaQuery.of(context).size.height * 0.85;
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 135, 98, 98),
+      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
       body: Container(
         color: Colors.white,
         child: Stack(
