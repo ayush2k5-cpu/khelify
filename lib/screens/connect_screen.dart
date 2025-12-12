@@ -1,6 +1,10 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
 import '../themes/khelify_theme.dart';
+import 'package:flutter/material.dart';
+import '../models/club.dart';
+import '../widgets/create_club_sheet.dart';
+import '../models/planned_game.dart';
+import '../widgets/plan_game_sheet.dart';
 
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen({super.key});
@@ -258,8 +262,7 @@ class _PersonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        highlighted ? Colors.blueAccent : Colors.transparent;
+    final borderColor = highlighted ? Colors.blueAccent : Colors.transparent;
 
     return Container(
       width: 170,
@@ -347,6 +350,46 @@ class _PersonCard extends StatelessWidget {
 class _GuildTab extends StatelessWidget {
   const _GuildTab({super.key});
 
+  void _showCreateClubSheet(BuildContext context) async {
+    final club = await showModalBottomSheet<Club>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const CreateClubSheet(),
+    );
+
+    if (club != null) {
+      debugPrint('New club created: ${club.name} in ${club.city}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Club "${club.name}" created in ${club.city}'),
+          backgroundColor: KhelifyColors.sapphireBlue,
+        ),
+      );
+    }
+  }
+
+  void _showPlanGameSheet(BuildContext context) async {
+    final game = await showModalBottomSheet<PlannedGame>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const PlanGameSheet(),
+    );
+
+    if (game != null) {
+      debugPrint(
+        'Planned game: ${game.sport} at ${game.location} on ${game.date} ${game.time} (max ${game.maxPlayers})',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Game planned at ${game.location}'),
+          backgroundColor: KhelifyColors.championGold,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -366,26 +409,29 @@ class _GuildTab extends StatelessWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              children: const [
+              children: [
                 _GuildActionCard(
                   title: 'Join a Club',
                   subtitle: 'Slip into a ready squad',
                   icon: Icons.groups_3_rounded,
-                  colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+                  colors: const [Color(0xFF43A047), Color(0xFF2E7D32)],
+                  onTap: () => _showJoinClubSheet(context),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 _GuildActionCard(
                   title: 'Create a Club',
                   subtitle: 'You call the plays now',
                   icon: Icons.add_circle_rounded,
-                  colors: [Color(0xFF42A5F5), Color(0xFF1565C0)],
+                  colors: const [Color(0xFF42A5F5), Color(0xFF1565C0)],
+                  onTap: () => _showCreateClubSheet(context),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 _GuildActionCard(
                   title: 'Plan a Game',
                   subtitle: 'Drop a time, fill the lobby',
                   icon: Icons.calendar_month_rounded,
-                  colors: [Color(0xFFFFB300), Color(0xFFF57C00)],
+                  colors: const [Color(0xFFFFB300), Color(0xFFF57C00)],
+                  onTap: () => _showPlanGameSheet(context),
                 ),
               ],
             ),
@@ -546,12 +592,14 @@ class _GuildActionCard extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final List<Color> colors;
+  final VoidCallback? onTap;
 
   const _GuildActionCard({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.colors,
+    this.onTap,
     super.key,
   });
 
@@ -601,9 +649,7 @@ class _GuildActionCardState extends State<_GuildActionCard>
           onTapDown: _onTapDown,
           onTapUp: _onTapUp,
           onTapCancel: _onTapCancel,
-          onTap: () {
-            // TODO: route to specific guild flow
-          },
+          onTap: widget.onTap,
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -703,6 +749,208 @@ class _BrowsePill extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// NOTE: _JoinClubSheet class now comes BEFORE _showJoinClubSheet
+
+class _JoinClubSheet extends StatelessWidget {
+  const _JoinClubSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+
+    return Container(
+      height: media.size.height * 0.8,
+      decoration: BoxDecoration(
+        color: KhelifyColors.cardDark,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // drag handle
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 6),
+            child: Center(
+              child: Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: KhelifyColors.textTertiary,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: Text(
+              'Join a Club',
+              style: KhelifyTypography.heading1.copyWith(color: Colors.white),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Slip into a ready squad that matches your sport and level.',
+              style: KhelifyTypography.bodySmall
+                  .copyWith(color: KhelifyColors.textSecondary),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // simple filters row (static for now)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                _FilterChip(label: 'Football'),
+                _FilterChip(label: 'Beginner'),
+                _FilterChip(label: 'Nearby'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              children: const [
+                _ClubListItem(
+                  name: 'Elite Strikers FC',
+                  subtitle: 'Football • Intermediate • Tue, Thu · 7–9 PM',
+                  location: 'Indiranagar Turf',
+                ),
+                _ClubListItem(
+                  name: 'Morning Runners Bangalore',
+                  subtitle: 'Running • Mixed • Daily · 6–7 AM',
+                  location: 'Cubbon Park',
+                ),
+                _ClubListItem(
+                  name: 'Weekend Hoops Squad',
+                  subtitle: 'Basketball • Casual • Sat, Sun · 5–7 PM',
+                  location: 'Koramangala Courts',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+void _showJoinClubSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => const _JoinClubSheet(),
+  );
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  const _FilterChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: KhelifyColors.cardLight.withOpacity(0.04),
+        border: Border.all(color: KhelifyColors.border),
+      ),
+      child: Text(
+        label,
+        style: KhelifyTypography.bodySmall
+            .copyWith(color: KhelifyColors.textSecondary),
+      ),
+    );
+  }
+}
+
+class _ClubListItem extends StatelessWidget {
+  final String name;
+  final String subtitle;
+  final String location;
+
+  const _ClubListItem({
+    required this.name,
+    required this.subtitle,
+    required this.location,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: KhelifyColors.cardDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: KhelifyColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: KhelifyColors.sapphireBlue.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.groups_3_rounded,
+                color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style:
+                      KhelifyTypography.heading3.copyWith(color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: KhelifyTypography.bodySmall
+                      .copyWith(color: KhelifyColors.textSecondary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  location,
+                  style: KhelifyTypography.caption
+                      .copyWith(color: KhelifyColors.textTertiary),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Request sent to join $name'),
+                  backgroundColor: KhelifyColors.sapphireBlue,
+                ),
+              );
+            },
+            child: Text(
+              'Join',
+              style: KhelifyTypography.button.copyWith(
+                color: KhelifyColors.championGold,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
