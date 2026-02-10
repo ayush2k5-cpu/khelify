@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'signup_screen.dart';
+import 'login_screen.dart';
 
 // --- NEW IMPORTS ---
 // Import your AuthService
@@ -9,28 +9,33 @@ import 'package:khelify_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // --- END OF NEW IMPORTS ---
 
-class LoginScreen extends StatefulWidget {
+class SignupScreen extends StatefulWidget {
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   // --- NEW ---
   // Create an instance of your AuthService
   final AuthService _authService = AuthService();
   // --- END OF NEW ---
 
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  bool _rememberMe = false;
+  bool _agreeTerms = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -55,50 +60,80 @@ class _LoginScreenState extends State<LoginScreen> {
               // ... YOUR BEAUTIFUL UI ...
               // (All your UI code from line 67 to 311 remains exactly the same)
               //
-              SizedBox(height: 40),
+              SizedBox(height: 30),
               Center(
                 child: Column(
                   children: [
                     Container(
-                      width: 140,
-                      height: 140,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Color(0xFFD2B68B), width: 3),
+                        border: Border.all(color: Color(0xFFD2B68B), width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFFD2B68B).withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                            color: Color(0xFFD2B68B).withOpacity(0.3),
+                            blurRadius: 15,
+                            spreadRadius: 3,
                           ),
                         ],
                       ),
                       child: Icon(Icons.directions_run,
-                          size: 80, color: Color(0xFFD2B68B)),
+                          size: 60, color: Color(0xFFD2B68B)),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 16),
                     Text(
                       'KHELIFY',
                       style: GoogleFonts.spaceMono(
-                        fontSize: 36,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFD2B68B),
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 6),
                     Text(
-                      'Fuel Your Potential',
+                      'Sign Up',
                       style: GoogleFonts.montserrat(
                         fontSize: 14,
                         color: Colors.grey[600],
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 60),
+              SizedBox(height: 40),
+              Text(
+                'Full Name',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Color(0xFF1A1A1A),
+                  border: Border.all(color: Color(0xFFD2B68B).withOpacity(0.3)),
+                ),
+                child: TextField(
+                  controller: _nameController,
+                  style: GoogleFonts.montserrat(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Enter your full name',
+                    hintStyle: GoogleFonts.montserrat(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                    ),
+                    prefixIcon: Icon(Icons.person, color: Color(0xFFD2B68B)),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
               Text(
                 'Email',
                 style: GoogleFonts.montserrat(
@@ -130,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
               Text(
                 'Password',
                 style: GoogleFonts.montserrat(
@@ -151,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: GoogleFonts.montserrat(color: Colors.white),
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: 'Create a password',
                     hintStyle: GoogleFonts.montserrat(
                       color: Colors.grey[700],
                       fontSize: 13,
@@ -173,34 +208,62 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 16),
+              Text(
+                'Confirm Password',
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Color(0xFF1A1A1A),
+                  border: Border.all(color: Color(0xFFD2B68B).withOpacity(0.3)),
+                ),
+                child: TextField(
+                  controller: _confirmPasswordController,
+                  style: GoogleFonts.montserrat(color: Colors.white),
+                  obscureText: _obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    hintText: 'Confirm your password',
+                    hintStyle: GoogleFonts.montserrat(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                    ),
+                    prefixIcon: Icon(Icons.lock, color: Color(0xFFD2B68B)),
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
+                      child: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Color(0xFFD2B68B),
+                      ),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Checkbox(
-                    value: _rememberMe,
+                    value: _agreeTerms,
                     onChanged: (val) =>
-                        setState(() => _rememberMe = val ?? false),
+                        setState(() => _agreeTerms = val ?? false),
                     activeColor: Color(0xFFD2B68B),
                   ),
-                  Text(
-                    'Remember me',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                    ),
-                  ),
-                  Spacer(),
-                  GestureDetector(
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Forgot password feature coming soon!')),
-                    ),
+                  Expanded(
                     child: Text(
-                      'Forgot Password?',
+                      'I agree to Terms & Conditions',
                       style: GoogleFonts.montserrat(
-                        color: Color(0xFFD2B68B),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -232,13 +295,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ],
-              SizedBox(height: 28),
+              SizedBox(height: 20),
               SizedBox(
                 height: 54,
-                // The button already calls _handleLogin() and uses _isLoading
+                // The button already calls _handleSignup() and uses _isLoading
                 // This is perfect, no change needed here.
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : () => _handleLogin(),
+                  onPressed: _isLoading ? null : () => _handleSignup(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFA41D3C),
                     shape: RoundedRectangleBorder(
@@ -256,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                       : Text(
-                          'Login',
+                          'Sign Up',
                           style: GoogleFonts.montserrat(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -266,24 +329,73 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey[800])),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'or',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey[800])),
+                ],
+              ),
+              SizedBox(height: 16),
+              SizedBox(
+                height: 54,
+                child: OutlinedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Google Sign Up coming soon!')),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Color(0xFFD2B68B), width: 1.5),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.g_mobiledata,
+                          color: Color(0xFFD2B68B), size: 24),
+                      SizedBox(width: 12),
+                      Text(
+                        'Continue with Google',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFD2B68B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Don\'t have an account? ',
+                    'Already have an account? ',
                     style: GoogleFonts.montserrat(
                       color: Colors.grey[600],
                       fontSize: 13,
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignupScreen())),
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    ),
                     child: Text(
-                      'Sign up',
+                      'Login',
                       style: GoogleFonts.montserrat(
                         color: Color(0xFFD2B68B),
                         fontWeight: FontWeight.bold,
@@ -302,15 +414,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // --- THIS IS THE MODIFIED FUNCTION ---
   // It is now 'async' to 'await' the Firebase call
-  void _handleLogin() async {
+  void _handleSignup() async {
     // This is your existing validation, it's perfect.
     String? emailError = _validateEmail(_emailController.text);
-
     setState(() {
-      if (emailError != null) {
+      if (_nameController.text.isEmpty) {
+        _errorMessage = 'Name is required';
+      } else if (emailError != null) {
         _errorMessage = emailError;
       } else if (_passwordController.text.isEmpty) {
         _errorMessage = 'Password is required';
+      } else if (_passwordController.text.length < 6) {
+        _errorMessage = 'Password must be at least 6 characters';
+      } else if (_passwordController.text != _confirmPasswordController.text) {
+        _errorMessage = 'Passwords do not match';
+      } else if (!_agreeTerms) {
+        _errorMessage = 'Please agree to Terms & Conditions';
       } else {
         _errorMessage = null;
       }
@@ -318,7 +437,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_errorMessage != null) return;
 
-    // Set loading state
+    // Set loading state (you already do this)
     setState(() => _isLoading = true);
 
     // --- REPLACED Future.delayed WITH REAL FIREBASE CALL ---
@@ -326,31 +445,27 @@ class _LoginScreenState extends State<LoginScreen> {
       // Get values from controllers
       String email = _emailController.text.trim();
       String password = _passwordController.text.trim();
+      String username = _nameController.text.trim();
 
-      // Call the auth service to sign in
-      User? user = await _authService.signInWithEmail(email, password);
+      // Call the auth service to create a user
+      User? user =
+          await _authService.signUpWithEmail(email, password, username);
 
       // if successful, stop loading and show success dialog
-      // (Later, you will want to navigate to a Home Page here)
       if (mounted && user != null) {
         setState(() => _isLoading = false);
         _showSuccessDialog();
       }
     } on FirebaseAuthException catch (e) {
-      // This catches errors from Firebase (like 'user-not-found')
+      // This catches errors from Firebase (like 'email-already-in-use')
       if (mounted) {
         setState(() {
           _isLoading = false;
-          // Provide user-friendly error messages
-          if (e.code == 'user-not-found') {
-            _errorMessage = 'No user found for that email.';
-          } else if (e.code == 'wrong-password') {
-            _errorMessage = 'Wrong password provided for that user.';
-          } else if (e.code == 'invalid-email') {
-            _errorMessage = 'The email address is not valid.';
+          // Use the actual error message from Firebase!
+          if (e.code == 'email-already-in-use') {
+            _errorMessage = 'This email is already in use.';
           } else {
-            _errorMessage =
-                'Login failed. Please check your credentials.'; // Generic error
+            _errorMessage = e.message;
           }
         });
       }
@@ -387,7 +502,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 16),
               Text(
-                'Welcome!',
+                'Account Created!',
                 style: GoogleFonts.montserrat(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -396,41 +511,38 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 8),
               Text(
-                'Login successful',
+                'Welcome to KHELIFY',
                 style: GoogleFonts.montserrat(
                   fontSize: 14,
                   color: Colors.grey[600],
                 ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // --- IMPORTANT ---
-                  // After login, you should navigate to your app's home screen
-                  // For example:
-                  // Navigator.pushReplacement(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => HomeScreen()),
-                  // );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFA41D3C),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text(
-                  'Continue',
-                  style: GoogleFonts.montserrat(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+      SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFA41D3C),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Text(
+          'Go to Login',
+          style: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
-    );
+    ],
+  ),
+  ),
+  ),
+  );
   }
 }

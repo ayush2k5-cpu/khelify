@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
   bool _isBusy = false;
   List<Pose> _poses = [];
   CameraDescription? _cameraDescription;
-  StreamSubscription? _cameraStreamSub;
 
   @override
   void initState() {
@@ -42,14 +42,11 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
     await _cameraController!.initialize();
     await _cameraController!.startImageStream(_processCameraImage);
 
-    final options = PoseDetectorOptions(
-      mode: PoseDetectionMode.stream,
+    _poseDetector = PoseDetector(
+      options: PoseDetectorOptions(mode: PoseDetectionMode.stream),
     );
-    _poseDetector = PoseDetector(options: options);
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
@@ -63,12 +60,12 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
       if (!mounted) return;
       setState(() {
         _poses = poses;
-        // Temporary debug
         // ignore: avoid_print
         print('Detected poses: ${poses.length}');
       });
-    } catch (_) {
-      // ignore errors in debug screen
+    } catch (e) {
+      // ignore: avoid_print
+      print('Pose error: $e');
     } finally {
       _isBusy = false;
     }
@@ -82,26 +79,27 @@ class _PoseDebugScreenState extends State<PoseDebugScreen> {
         InputImageRotationValue.fromRawValue(camera.sensorOrientation) ??
             InputImageRotation.rotation0deg;
 
-    final format =
-        InputImageFormatValue.fromRawValue(image.format.raw) ??
-            InputImageFormat.nv21;
-
-    final plane = image.planes.first;
+    // Safest generic approach for older plugins: concatenate all plane bytes.
+    final List<int> bytes = <int>[];
+    for (final Plane plane in image.planes) {
+      bytes.addAll(plane.bytes);
+    }
+    final Uint8List bytesUint8 = Uint8List.fromList(bytes);
 
     return InputImage.fromBytes(
-      bytes: plane.bytes,
+      bytes: bytesUint8,
       metadata: InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
         rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
+        // yuv420 is what CameraImage uses on Android; older plugin only needs this + bytesPerRow.
+        format: InputImageFormat.yuv420,
+        bytesPerRow: image.planes.first.bytesPerRow,
       ),
     );
   }
 
   @override
   void dispose() {
-    _cameraStreamSub?.cancel();
     _cameraController?.dispose();
     _poseDetector.close();
     super.dispose();

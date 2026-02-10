@@ -1,51 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'themes/khelify_theme.dart';
-import 'screens/main_app_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'firebase_options.dart';
+import 'app.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // Lock to portrait mode
-  SystemChrome.setPreferredOrientations([
+  // Lock orientation
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set status bar style
+  // Set system UI overlay
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // BLACK ON WHITE
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light, 
+      systemNavigationBarColor: Color(0xFF0A0E1A), 
+      systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
 
-  runApp(const KhelifyApp());
-}
-
-class KhelifyApp extends StatelessWidget {
-  const KhelifyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'KHELIFY',
-      debugShowCheckedModeBanner: false,
-      theme: KhelifyTheme.lightTheme,
-      home: const MainAppScreen(),
-      scrollBehavior: NoGlowScrollBehavior(), // Use your custom scroll behavior globally
-    );
-  }
-}
-
-// ========= UTILS =========
-
-class NoGlowScrollBehavior extends ScrollBehavior {
-  @override
-  Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
-    return child;
-  }
+  runApp(
+    const ProviderScope(
+      child: KhelifyApp(),
+    ),
+  );
 }
