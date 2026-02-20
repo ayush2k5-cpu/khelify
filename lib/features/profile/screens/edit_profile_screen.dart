@@ -178,7 +178,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
               // ── Sport Dropdown ──────────────────────
               DropdownButtonFormField<String>(
-                initialValue: _selectedSport,
+                value: _selectedSport,
                 dropdownColor: AppColors.surface,
                 style: AppTypography.bodyLarge,
                 decoration: InputDecoration(
