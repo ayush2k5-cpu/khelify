@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
