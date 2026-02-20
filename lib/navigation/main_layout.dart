@@ -5,6 +5,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_gradients.dart';
 import '../core/theme/app_typography.dart';
 import '../features/feed/screens/feed_screen.dart';
+import '../features/profile/screens/profile_screen.dart';
 
 /// Main app shell with bottom navigation and FAB for drill recording.
 class MainLayout extends StatefulWidget {
@@ -23,7 +24,7 @@ class _MainLayoutState extends State<MainLayout> {
     _PlaceholderScreen(title: 'Explore', icon: LucideIcons.compass),    // 1: Explore
     const SizedBox(),       // 2: Record (placeholder — FAB handles this)
     _PlaceholderScreen(title: 'Stats', icon: LucideIcons.barChart3),    // 3: Stats
-    _PlaceholderScreen(title: 'Profile', icon: LucideIcons.user),       // 4: Profile
+    const ProfileScreen(),       // 4: Profile
   ];
 
   @override
