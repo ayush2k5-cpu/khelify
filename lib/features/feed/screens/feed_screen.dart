@@ -1,77 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/glass_card.dart';
+import 'package:khelify_app/core/theme/app_colors.dart';
+import 'package:khelify_app/core/theme/app_typography.dart';
+import '../providers/feed_provider.dart';
+import '../widgets/feed_card.dart';
+import '../widgets/feed_shimmer.dart';
 
 class FeedScreen extends ConsumerWidget {
   const FeedScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final feedAsync = ref.watch(feedStreamProvider);
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.background, AppColors.surface],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Social Feed',
+          style: AppTypography.h1.copyWith(
+            // ← was headlineMedium
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
           ),
-          
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+        ),
+      ),
+      body: feedAsync.when(
+        loading: () => const FeedShimmer(),
+        error: (err, stack) => Center(
+          child: Text(
+            'Error: $err',
+            style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+          ),
+        ),
+        data: (posts) {
+          if (posts.isEmpty) {
+            return Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Khelify", style: AppTypography.displayLarge),
-                  const SizedBox(height: 24),
-                  
-                  // Test Glass Card
-                  GlassCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Welcome to the Reboot", style: AppTypography.h2),
-                        const SizedBox(height: 8),
-                        Text(
-                          "This is the new Glassmorphic design system in action. Gold and Blue accents are ready.",
-                          style: AppTypography.bodyMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppColors.blueLight, AppColors.blueDark],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.blueDark.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            "LET'S GO",
-                            style: AppTypography.button,
-                          ),
-                        ),
-                      ],
+                  Icon(
+                    Icons.sports_score,
+                    size: 64,
+                    color: AppColors.textSecondary.withOpacity(0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No activity yet',
+                    style: AppTypography.h2.copyWith(
+                      // ← was titleLarge
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Complete a drill to appear in the feed.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: posts.length,
+            itemBuilder: (context, index) => FeedCard(post: posts[index]),
+          );
+        },
       ),
     );
   }
