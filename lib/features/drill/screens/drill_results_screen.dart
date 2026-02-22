@@ -1,12 +1,16 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/user_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../core/constants/tier_constants.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../models/drill.dart';
+import '../models/drill_result.dart';
+import '../providers/drill_provider.dart';
 import '../services/scoring_service.dart';
 
 class DrillResultsScreen extends ConsumerStatefulWidget {
@@ -61,6 +65,40 @@ class _DrillResultsScreenState extends ConsumerState<DrillResultsScreen>
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted) _fadeController.forward();
     });
+
+    // Save result to Firestore
+    _saveResult();
+  }
+
+  /// Save drill result and update user stats (fire-and-forget)
+  Future<void> _saveResult() async {
+    try {
+      final user = ref.read(currentUserProvider);
+      if (user == null) return;
+
+      final score = widget.scoringResult.overallScore.round();
+      final result = DrillResult(
+        id: '',
+        drillId: widget.drill.id,
+        drillName: widget.drill.name,
+        userId: user.uid,
+        score: score,
+        tier: DrillResult.tierFromScore(score),
+        duration: Duration(seconds: widget.durationSeconds),
+        techniqueBreakdown: widget.scoringResult.techniqueBreakdown,
+      );
+
+      // Save result to Firestore
+      await ref.read(drillResultServiceProvider).saveDrillResult(result);
+
+      // Update user stats (totalDrills, bestScore, averageScore, tier)
+      await ref.read(userServiceProvider).recordDrillCompletion(
+            uid: user.uid,
+            score: score.toDouble(),
+          );
+    } catch (e) {
+      debugPrint('Failed to save drill result: $e');
+    }
   }
 
   @override
