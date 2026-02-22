@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users ──────────────────────────────────────────────
+    // Anyone authenticated can read any user profile (for feed cards)
+    // Only the owner can write their own profile
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if false; // Users cannot delete their own profile
+    }
+
+    // ── Results (drill results) ────────────────────────────
+    // Anyone authenticated can read results (for stats/leaderboards)
+    // Only the owner can create their own results
+    match /results/{resultId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Results are immutable
+    }
+
+    // ── Feed ───────────────────────────────────────────────
+    // Anyone authenticated can read feed (social feed is public)
+    // Only the owner can create their own feed entry
+    match /feed/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // Feed posts are immutable
+    }
+
+    // ── Deny everything else ───────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

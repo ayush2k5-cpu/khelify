@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/models/user_model.dart';
+import '../../../core/providers/user_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_gradients.dart';
@@ -30,13 +32,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).signUp(
+      final credential = await ref.read(authServiceProvider).signUp(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+
+      // Create Firestore user doc for the new user
+      final firebaseUser = credential.user;
+      if (firebaseUser != null) {
+        final newUser = UserModel.newUser(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email ?? _emailController.text.trim(),
+          displayName: firebaseUser.email?.split('@').first ?? 'Athlete',
+        );
+        await ref.read(userServiceProvider).createUser(newUser);
+      }
+
       // Navigation is handled by AuthGate listening to stream
-       // But we might want to pop the signup screen if it was pushed? 
-       // AuthGate will handle the root replacement.
        if (mounted) {
          Navigator.of(context).popUntil((route) => route.isFirst);
        }
