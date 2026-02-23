@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_gradients.dart';
 import '../core/theme/app_typography.dart';
+import '../features/explore/screens/explore_screen.dart';
 import '../features/feed/screens/feed_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 
@@ -21,7 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
   // Screens for each tab
   final List<Widget> _screens = [
     const FeedScreen(),     // 0: Feed
-    _PlaceholderScreen(title: 'Explore', icon: LucideIcons.compass),    // 1: Explore
+    const ExploreScreen(),    // 1: Explore
     const SizedBox(),       // 2: Record (placeholder — FAB handles this)
     _PlaceholderScreen(title: 'Stats', icon: LucideIcons.barChart3),    // 3: Stats
     const ProfileScreen(),       // 4: Profile
