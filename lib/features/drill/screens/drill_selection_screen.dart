@@ -15,11 +15,14 @@ class DrillSelectionScreen extends ConsumerStatefulWidget {
 }
 
 class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
-  String _selectedSport = DrillConstants.sports.first;
+  String _selectedSport = DrillConstants.activeSports.first;
 
   @override
   Widget build(BuildContext context) {
-    final drills = DrillConstants.getDrillsBySport(_selectedSport);
+    final isComingSoon = DrillConstants.isComingSoon(_selectedSport);
+    final drills = isComingSoon
+        ? <Drill>[]
+        : DrillConstants.getDrillsBySport(_selectedSport);
 
     return Scaffold(
       body: Stack(
@@ -50,17 +53,19 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
                   _buildSportTabs(),
                   const SizedBox(height: 24),
 
-                  // Drill List
+                  // Content
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: drills.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildDrillCard(drills[index]),
-                        );
-                      },
-                    ),
+                    child: isComingSoon
+                        ? _buildComingSoonView()
+                        : ListView.builder(
+                            itemCount: drills.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _buildDrillCard(drills[index]),
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -75,8 +80,10 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: DrillConstants.sports.map((sport) {
+        children: DrillConstants.allSports.map((sport) {
           final isSelected = sport == _selectedSport;
+          final isComingSoon = DrillConstants.isComingSoon(sport);
+
           return Padding(
             padding: const EdgeInsets.only(right: 12),
             child: GestureDetector(
@@ -85,19 +92,36 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  gradient: isSelected ? AppGradients.blue : null,
-                  color: isSelected ? null : AppColors.glassFill,
+                  gradient: isSelected && !isComingSoon ? AppGradients.blue : null,
+                  color: isSelected && isComingSoon
+                      ? AppColors.glassFillStrong
+                      : isSelected
+                          ? null
+                          : AppColors.glassFill,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: isSelected ? Colors.transparent : AppColors.glassBorder,
                   ),
                 ),
-                child: Text(
-                  sport,
-                  style: AppTypography.h3.copyWith(
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isComingSoon) ...[
+                      Icon(
+                        Icons.lock_outline,
+                        size: 14,
+                        color: isSelected ? Colors.white70 : AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      sport,
+                      style: AppTypography.h3.copyWith(
+                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -107,12 +131,74 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
     );
   }
 
+  Widget _buildComingSoonView() {
+    final sportEmoji = _selectedSport == 'Boxing' ? '🥊' : '🎮';
+    final sportDesc = _selectedSport == 'Boxing'
+        ? 'Boxing drills with stance, punch extension, and guard position analysis.'
+        : 'Esports coaching with reaction time, game sense, and strategy metrics.';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(sportEmoji, style: const TextStyle(fontSize: 64)),
+            const SizedBox(height: 24),
+            Text(
+              '$_selectedSport',
+              style: AppTypography.h1,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: AppGradients.gold,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'COMING SOON',
+                style: AppTypography.label.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              sportDesc,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 32),
+            GlassCard(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.notifications_outlined, color: AppColors.blue, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Notify me when available',
+                    style: AppTypography.h3.copyWith(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDrillCard(Drill drill) {
     return GlassCard(
       onTap: () {
         Navigator.pushNamed(
           context,
-          '/drill/record',
+          '/drill/setup',
           arguments: drill,
         );
       },
@@ -149,6 +235,20 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
                       '${drill.estimatedDuration.inSeconds}s',
                       style: AppTypography.bodySmall,
                     ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      _cameraIcon(drill.cameraPosition),
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      drill.cameraPosition,
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.textTertiary,
+                        fontSize: 10,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -160,6 +260,17 @@ class _DrillSelectionScreenState extends ConsumerState<DrillSelectionScreen> {
         ],
       ),
     );
+  }
+
+  IconData _cameraIcon(String position) {
+    switch (position) {
+      case 'side':
+        return Icons.phone_android;
+      case 'front':
+        return Icons.center_focus_strong;
+      default:
+        return Icons.videocam;
+    }
   }
 
   Widget _difficultyChip(String difficulty) {

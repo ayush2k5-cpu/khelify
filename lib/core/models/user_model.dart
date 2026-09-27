@@ -7,13 +7,18 @@ class UserModel {
   final String displayName;
   final String email;
   final String? avatarUrl;
-  final String sport; // 'football', 'badminton', 'cricket'
+  final String sport; // 'football', 'cricket', 'athletics'
   final String tier; // 'elite', 'pro', 'advanced', 'beginner'
   final int totalDrills;
   final double bestScore;
   final double averageScore;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  // ─── Khelo India / NSRS future integration hooks ───
+  final String? nsrsId;    // NSRS athlete ID (e.g. 'KI-2026-MH-12345')
+  final String? state;     // e.g. 'Maharashtra'
+  final String? district;  // e.g. 'Pune'
 
   const UserModel({
     required this.uid,
@@ -27,6 +32,9 @@ class UserModel {
     this.averageScore = 0.0,
     required this.createdAt,
     required this.updatedAt,
+    this.nsrsId,
+    this.state,
+    this.district,
   });
 
   /// Create a new user with default values (call on first signup)
@@ -70,6 +78,9 @@ class UserModel {
       updatedAt: data['updatedAt'] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : DateTime.now(),
+      nsrsId: data['nsrsId'],
+      state: data['state'],
+      district: data['district'],
     );
   }
 
@@ -86,6 +97,9 @@ class UserModel {
       'averageScore': averageScore,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+      'nsrsId': nsrsId,
+      'state': state,
+      'district': district,
     };
   }
 
@@ -100,6 +114,9 @@ class UserModel {
     double? bestScore,
     double? averageScore,
     DateTime? updatedAt,
+    String? nsrsId,
+    String? state,
+    String? district,
   }) {
     return UserModel(
       uid: uid,
@@ -113,6 +130,9 @@ class UserModel {
       averageScore: averageScore ?? this.averageScore,
       createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
+      nsrsId: nsrsId ?? this.nsrsId,
+      state: state ?? this.state,
+      district: district ?? this.district,
     );
   }
 }

@@ -150,13 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     onPressed: () {
-                      // TODO: uncomment after edit_profile_screen.dart is created
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (_) => EditProfileScreen(user: user),
-                      //   ),
-                      // );
+                      Navigator.pushNamed(context, '/profile/edit', arguments: user);
                     },
                     child: Text('Edit Profile', style: AppTypography.button),
                   ),
@@ -173,7 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     onPressed: () {
-                      // R2's settings screen — coordinate later
+                      Navigator.pushNamed(context, '/settings');
                     },
                     child: Text('Settings', style: AppTypography.button),
                   ),

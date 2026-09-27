@@ -42,12 +42,22 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> loadProfile(String uid) async {
     state = ProfileLoading();
     try {
-      final user = await _userService.getUser(uid);
-      if (user == null) {
-        state = ProfileError('User not found');
-      } else {
-        state = ProfileLoaded(user);
-      }
+      // MOCK DATA FOR DEMO PURPOSES
+      final mockUser = UserModel(
+        uid: uid,
+        displayName: 'Demo Athlete',
+        email: 'demo@khelify.app',
+        sport: 'football',
+        tier: 'elite',
+        totalDrills: 42,
+        bestScore: 95.5,
+        averageScore: 82.0,
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+        updatedAt: DateTime.now(),
+        state: 'Maharashtra',
+        district: 'Mumbai',
+      );
+      state = ProfileLoaded(mockUser);
     } catch (e) {
       state = ProfileError(e.toString());
     }

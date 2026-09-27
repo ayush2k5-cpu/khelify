@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import '../core/models/user_model.dart';
 import '../features/auth/screens/auth_gate.dart';
 import '../features/auth/screens/signup_screen.dart';
 import '../features/drill/screens/drill_selection_screen.dart';
+import '../features/drill/screens/drill_setup_screen.dart';
 import '../features/drill/screens/drill_recording_screen.dart';
 import '../features/drill/screens/drill_results_screen.dart';
 import '../features/drill/models/drill.dart';
 import '../features/drill/services/scoring_service.dart';
+import '../features/profile/screens/edit_profile_screen.dart';
+import '../features/settings/screens/settings_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -18,6 +22,12 @@ class AppRouter {
 
       case '/drill/select':
         return MaterialPageRoute(builder: (_) => const DrillSelectionScreen());
+
+      case '/drill/setup':
+        final drill = settings.arguments as Drill;
+        return MaterialPageRoute(
+          builder: (_) => DrillSetupScreen(drill: drill),
+        );
 
       case '/drill/record':
         final drill = settings.arguments as Drill;
@@ -34,6 +44,13 @@ class AppRouter {
             durationSeconds: args['duration'] as int,
           ),
         );
+
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+
+      case '/profile/edit':
+        final user = settings.arguments as UserModel;
+        return MaterialPageRoute(builder: (_) => EditProfileScreen(user: user));
 
       default:
         return MaterialPageRoute(

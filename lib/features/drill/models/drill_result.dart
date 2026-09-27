@@ -5,11 +5,13 @@ class DrillResult {
   final String id;
   final String drillId;
   final String drillName;
+  final String sport;        // 'Football', 'Cricket', 'Athletics'
   final String userId;
   final int score;           // 0-100
   final String tier;         // 'elite', 'pro', 'advanced', 'beginner'
   final Duration duration;
   final Map<String, double> techniqueBreakdown; // e.g. {"Knee Drive": 85.0, "Arm Swing": 72.0}
+  final double confidence;   // Average landmark likelihood (0.0-1.0)
   final String? videoPath;   // Local path for video (before upload)
   final String? videoUrl;    // Cloud URL after upload
   final DateTime timestamp;
@@ -18,11 +20,13 @@ class DrillResult {
     required this.id,
     required this.drillId,
     required this.drillName,
+    this.sport = '',
     required this.userId,
     required this.score,
     required this.tier,
     required this.duration,
     required this.techniqueBreakdown,
+    this.confidence = 0.0,
     this.videoPath,
     this.videoUrl,
     DateTime? timestamp,
@@ -41,11 +45,13 @@ class DrillResult {
     return {
       'drillId': drillId,
       'drillName': drillName,
+      'sport': sport,
       'userId': userId,
       'score': score,
       'tier': tier,
       'duration': duration.inSeconds,
       'techniqueBreakdown': techniqueBreakdown,
+      'confidence': confidence,
       'videoUrl': videoUrl,
       'timestamp': Timestamp.fromDate(timestamp),
     };
@@ -57,11 +63,13 @@ class DrillResult {
       id: doc.id,
       drillId: data['drillId'] ?? '',
       drillName: data['drillName'] ?? '',
+      sport: data['sport'] ?? '',
       userId: data['userId'] ?? '',
       score: data['score'] ?? 0,
       tier: data['tier'] ?? 'beginner',
       duration: Duration(seconds: data['duration'] ?? 0),
       techniqueBreakdown: Map<String, double>.from(data['techniqueBreakdown'] ?? {}),
+      confidence: (data['confidence'] ?? 0.0).toDouble(),
       videoUrl: data['videoUrl'],
       timestamp: (data['timestamp'] as Timestamp).toDate(),
     );

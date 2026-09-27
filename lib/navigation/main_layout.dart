@@ -7,6 +7,8 @@ import '../core/theme/app_typography.dart';
 import '../features/explore/screens/explore_screen.dart';
 import '../features/feed/screens/feed_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
+import '../features/settings/screens/settings_screen.dart';
+import '../features/stats/screens/stats_screen.dart';
 
 /// Main app shell with bottom navigation and FAB for drill recording.
 class MainLayout extends StatefulWidget {
@@ -24,7 +26,7 @@ class _MainLayoutState extends State<MainLayout> {
     const FeedScreen(),     // 0: Feed
     const ExploreScreen(),    // 1: Explore
     const SizedBox(),       // 2: Record (placeholder — FAB handles this)
-    _PlaceholderScreen(title: 'Stats', icon: LucideIcons.barChart3),    // 3: Stats
+    const StatsScreen(),    // 3: Stats
     const ProfileScreen(),       // 4: Profile
   ];
 

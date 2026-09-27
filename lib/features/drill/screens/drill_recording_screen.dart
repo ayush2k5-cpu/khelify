@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import '../../../core/providers/user_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_gradients.dart';
@@ -135,8 +136,16 @@ class _DrillRecordingScreenState extends ConsumerState<DrillRecordingScreen>
 
     setState(() => _isRecording = false);
 
-    // Calculate score
-    final result = ScoringService.evaluate(_allPoseFrames, widget.drill);
+    // Get user tier for adaptive scoring
+    final userAsync = ref.read(currentUserProfileProvider);
+    final userTier = userAsync.valueOrNull?.tier ?? 'beginner';
+
+    // Calculate score using new Gaussian engine
+    final result = ScoringService.evaluate(
+      drill: widget.drill,
+      frames: _allPoseFrames,
+      userTier: userTier,
+    );
 
     if (mounted) {
       Navigator.pushReplacementNamed(
@@ -286,6 +295,33 @@ class _DrillRecordingScreenState extends ConsumerState<DrillRecordingScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Camera Positioning Guide (shown before recording)
+                    if (!_isRecording && !_isCountingDown)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.blue.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.blue.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.videocam, color: AppColors.blue, size: 18),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Place phone ${widget.drill.cameraPosition}-on, 3-4m away',
+                                style: AppTypography.bodySmall.copyWith(color: AppColors.blue),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     // Pose Detection Status
                     if (_isRecording)
                       Container(

@@ -81,11 +81,13 @@ class _DrillResultsScreenState extends ConsumerState<DrillResultsScreen>
         id: '',
         drillId: widget.drill.id,
         drillName: widget.drill.name,
+        sport: widget.drill.sport,
         userId: user.uid,
         score: score,
         tier: DrillResult.tierFromScore(score),
         duration: Duration(seconds: widget.durationSeconds),
         techniqueBreakdown: widget.scoringResult.techniqueBreakdown,
+        confidence: widget.scoringResult.confidence,
       );
 
       // Save result to Firestore
@@ -158,11 +160,17 @@ class _DrillResultsScreenState extends ConsumerState<DrillResultsScreen>
                   // Stats Row
                   FadeTransition(
                     opacity: _fadeController,
-                    child: Row(
+                    child: Column(
                       children: [
-                        Expanded(child: _buildStatCard('Duration', '${widget.durationSeconds}s')),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildStatCard('Frames', '${widget.scoringResult.techniqueBreakdown.length} criteria')),
+                        Row(
+                          children: [
+                            Expanded(child: _buildStatCard('Duration', '${widget.durationSeconds}s')),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildStatCard('Criteria', '${widget.scoringResult.techniqueBreakdown.length}')),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _buildConfidenceIndicator(),
                       ],
                     ),
                   ),
@@ -346,6 +354,59 @@ class _DrillResultsScreenState extends ConsumerState<DrillResultsScreen>
           Text(label, style: AppTypography.bodySmall),
           const SizedBox(height: 4),
           Text(value, style: AppTypography.h3),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfidenceIndicator() {
+    final confidence = widget.scoringResult.confidence;
+    final String label;
+    final Color color;
+    final IconData icon;
+
+    if (confidence >= 0.8) {
+      label = 'High Confidence';
+      color = AppColors.success;
+      icon = Icons.verified;
+    } else if (confidence >= 0.65) {
+      label = 'Medium Confidence';
+      color = AppColors.warning;
+      icon = Icons.info_outline;
+    } else {
+      label = 'Low Confidence';
+      color = AppColors.error;
+      icon = Icons.warning_amber_rounded;
+    }
+
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: AppTypography.h3.copyWith(fontSize: 13, color: color)),
+                const SizedBox(height: 2),
+                Text(
+                  confidence >= 0.65
+                      ? 'Body detection was reliable during this session'
+                      : 'Try better lighting or move further from the camera',
+                  style: AppTypography.label.copyWith(
+                    color: AppColors.textTertiary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${(confidence * 100).round()}%',
+            style: AppTypography.h3.copyWith(color: color),
+          ),
         ],
       ),
     );

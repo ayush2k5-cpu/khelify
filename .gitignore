@@ -73,3 +73,6 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 >>>>>>> 3edc816af1447cb86ebf3aeb445827d888a9a7de
+
+# October desktop — local canvas state
+.october/

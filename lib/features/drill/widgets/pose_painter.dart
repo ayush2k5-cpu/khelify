@@ -35,8 +35,17 @@ class PosePainter extends CustomPainter {
 
     // Confidence threshold paint (dim joints with low confidence)
     final Paint dimJointPaint = Paint()
-      ..color = AppColors.blueLight.withOpacity(0.3)
+      ..color = AppColors.blueLight.withOpacity(0.25)
       ..style = PaintingStyle.fill;
+
+    final Paint dimBonePaint = Paint()
+      ..color = AppColors.blueLight.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    // Confidence threshold matching scoring engine
+    const double kMinLikelihood = 0.65;
 
     for (final pose in poses) {
       final landmarks = pose.landmarks;
@@ -62,7 +71,13 @@ class PosePainter extends CustomPainter {
         final p1 = pointFor(a);
         final p2 = pointFor(b);
         if (p1 == null || p2 == null) return;
-        canvas.drawLine(p1, p2, bonePaint);
+
+        // Dim bones when either landmark has low confidence
+        final lmA = landmarks[a];
+        final lmB = landmarks[b];
+        final isConfident = (lmA?.likelihood ?? 0) >= kMinLikelihood &&
+            (lmB?.likelihood ?? 0) >= kMinLikelihood;
+        canvas.drawLine(p1, p2, isConfident ? bonePaint : dimBonePaint);
       }
 
       // ── Draw Skeleton ──
@@ -95,8 +110,8 @@ class PosePainter extends CustomPainter {
         final p = pointFor(entry.key);
         if (p == null) continue;
 
-        // Use confidence to decide paint intensity
-        final paint = landmark.likelihood > 0.5 ? jointPaint : dimJointPaint;
+        // Use confidence to decide paint intensity (0.65 threshold matches scoring)
+        final paint = landmark.likelihood >= kMinLikelihood ? jointPaint : dimJointPaint;
         canvas.drawCircle(p, 5, paint);
       }
     }
