@@ -76,3 +76,7 @@ doc/api/
 
 # October desktop — local canvas state
 .october/
+
+# Graphify local knowledge-graph output (regenerated; canonical copy lives in
+# Ojas vault/graph-imports/khelify/)
+graphify-out/
